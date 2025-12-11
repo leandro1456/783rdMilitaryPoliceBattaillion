@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archives Judiciaires - Military Police</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --olive-drab: #4a4a2a;
+            --army-green: #3d3d1e;
+            --paper-cream: #f4e4bc;
+            --paper-aged: #e8d4a8;
+            --ink-black: #1a1a1a;
+            --ink-faded: #3d3528;
+            --stamp-red: #8b2323;
+            --stamp-blue: #1e3a5f;
+            --border-dark: #2a2a1a;
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%234a4a2a" width="100" height="100"/><circle fill="%233d3d1e" cx="25" cy="25" r="2" opacity="0.3"/><circle fill="%233d3d1e" cx="75" cy="75" r="1.5" opacity="0.2"/><circle fill="%233d3d1e" cx="50" cy="10" r="1" opacity="0.25"/></svg>'),
+                linear-gradient(135deg, #4a4a2a 0%, #3d3d1e 50%, #2a2a1a 100%);
+            min-height: 100vh;
+            color: var(--ink-black);
+        }
+
+        .paper-texture {
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px),
+                linear-gradient(135deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .header {
+            background: var(--paper-cream);
+            border: 3px double var(--border-dark);
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 5px 5px 15px var(--shadow-color);
+        }
+
+        .header::before {
+            content: "★ CLASSIFIED ★";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--stamp-red);
+            color: white;
+            padding: 2px 20px;
+            font-family: 'Special Elite', cursive;
+            font-size: 12px;
+            letter-spacing: 3px;
+        }
+
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+
+        .header h1 {
+            font-family: 'Special Elite', cursive;
+            font-size: 28px;
+            color: var(--ink-black);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+        }
+
+        .header-subtitle { font-size: 12px; color: var(--ink-faded); margin-top: 5px; letter-spacing: 2px; }
+
+        .date-stamp {
+            font-family: 'Special Elite', cursive;
+            font-size: 14px;
+            color: var(--stamp-blue);
+            text-align: right;
+            border: 2px solid var(--stamp-blue);
+            padding: 5px 15px;
+            transform: rotate(-2deg);
+        }
+
+        .nav-tabs { display: flex; gap: 5px; margin-bottom: -3px; position: relative; z-index: 10; flex-wrap: wrap; }
+
+        .nav-tab {
+            font-family: 'Special Elite', cursive;
+            background: var(--paper-aged);
+            border: 2px solid var(--border-dark);
+            border-bottom: none;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            color: var(--ink-faded);
+        }
+
+        .nav-tab:hover { background: var(--paper-cream); }
+        .nav-tab.active { background: var(--paper-cream); color: var(--ink-black); border-bottom: 3px solid var(--paper-cream); margin-bottom: -3px; }
+
+        .main-panel {
+            background: var(--paper-cream);
+            border: 3px solid var(--border-dark);
+            padding: 30px;
+            min-height: 500px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.08), 8px 8px 20px var(--shadow-color);
+            position: relative;
+        }
+
+        .main-panel::after {
+            content: "";
+            position: absolute;
+            top: 10px; right: 10px; bottom: 10px; left: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            pointer-events: none;
+        }
+
+        .section-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-bottom: 2px solid var(--ink-black);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title::before { content: "§"; font-size: 24px; }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-label {
+            display: block;
+            font-family: 'Special Elite', cursive;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            color: var(--ink-faded);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 14px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--border-dark);
+            color: var(--ink-black);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            background: rgba(255,255,255,0.8);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            font-family: 'Special Elite', cursive;
+            padding: 10px 25px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: 2px solid;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--army-green); color: var(--paper-cream); border-color: var(--border-dark); }
+        .btn-primary:hover { background: var(--olive-drab); transform: translateY(-1px); box-shadow: 3px 3px 8px var(--shadow-color); }
+        .btn-danger { background: var(--stamp-red); color: white; border-color: #5a1515; }
+        .btn-danger:hover { background: #a52a2a; }
+        .btn-secondary { background: var(--paper-aged); color: var(--ink-black); border-color: var(--border-dark); }
+        .btn-secondary:hover { background: var(--paper-cream); }
+        .btn-small { padding: 5px 10px; font-size: 11px; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th {
+            font-family: 'Special Elite', cursive;
+            background: var(--army-green);
+            color: var(--paper-cream);
+            padding: 12px 10px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+            border: 1px solid var(--border-dark);
+        }
+        .data-table td { padding: 10px; border: 1px solid rgba(0,0,0,0.2); background: rgba(255,255,255,0.3); }
+        .data-table tr:nth-child(even) td { background: rgba(255,255,255,0.5); }
+        .data-table tr:hover td { background: rgba(255,255,200,0.5); }
+
+        .stamp-confidential {
+            display: inline-block;
+            font-family: 'Special Elite', cursive;
+            color: var(--stamp-red);
+            border: 3px solid var(--stamp-red);
+            padding: 5px 15px;
+            transform: rotate(-5deg);
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,255,255,0.4); border: 2px solid var(--border-dark); padding: 15px; text-align: center; }
+        .stat-box .unit-name { font-family: 'Special Elite', cursive; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .stat-box .stat-number { font-size: 28px; font-weight: bold; color: var(--army-green); }
+
+        .login-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--paper-cream);
+            border: 4px double var(--border-dark);
+            padding: 40px;
+            width: 420px;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .login-box::before {
+            content: "RESTRICTED ACCESS";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--stamp-red);
+            color: white;
+            padding: 5px 20px;
+            font-family: 'Special Elite', cursive;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .login-title { font-family: 'Special Elite', cursive; font-size: 24px; text-align: center; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px; }
+        .login-divider { text-align: center; margin: 20px 0; font-family: 'Special Elite', cursive; color: var(--ink-faded); position: relative; }
+        .login-divider::before, .login-divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border-dark); }
+        .login-divider::before { left: 0; }
+        .login-divider::after { right: 0; }
+
+        .badge-convocation {
+            background: var(--stamp-red);
+            color: white;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-family: 'Special Elite', cursive;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-row { display: flex; gap: 15px; align-items: flex-end; }
+        .form-row > * { flex: 1; }
+
+        .hidden { display: none !important; }
+
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box .form-input { flex: 1; }
+
+        .detail-card { background: rgba(255,255,255,0.5); border: 2px solid var(--border-dark); padding: 20px; margin-bottom: 20px; }
+        .detail-card h3 {
+            font-family: 'Special Elite', cursive;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-dark);
+        }
+
+        .user-badge { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .user-badge.admin { background: var(--stamp-red); color: white; }
+        .user-badge.mp { background: var(--stamp-blue); color: white; }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--army-green);
+            color: var(--paper-cream);
+            padding: 15px 25px;
+            font-family: 'Special Elite', cursive;
+            border: 2px solid var(--border-dark);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: var(--paper-cream);
+            font-family: 'Special Elite', cursive;
+        }
+        .loading-text { font-size: 20px; letter-spacing: 3px; margin-top: 20px; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid var(--paper-aged); border-top-color: var(--army-green); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+        }
+        .modal-content { background: var(--paper-cream); border: 3px double var(--border-dark); padding: 30px; max-width: 500px; width: 90%; }
+        .modal-title { font-family: 'Special Elite', cursive; font-size: 18px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+
+        .link-btn { color: var(--stamp-blue); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: inherit; font-size: inherit; }
+        .link-btn:hover { color: var(--stamp-red); }
+
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--army-green);
+            color: var(--paper-cream);
+            font-family: 'Special Elite', cursive;
+            font-size: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .user-bar .user-info { display: flex; align-items: center; gap: 15px; }
+
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; text-align: center; gap: 15px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .login-box { width: 95%; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Chargement des archives...</div>
+    </div>
+
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <h2 class="login-title">Military Police<br>Archives</h2>
+            <div class="form-group">
+                <label class="form-label">Identifiant</label>
+                <input type="text" id="loginUsername" class="form-input" placeholder="Votre identifiant...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mot de passe</label>
+                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+            </div>
+            <div style="margin-top: 25px;">
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">Connexion MP</button>
+            </div>
+            <div class="login-divider">ou</div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="enterPublicMode()">Consultation Publique</button>
+            <div id="loginError" style="color: var(--stamp-red); text-align: center; margin-top: 15px; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="container hidden">
+        <div class="user-bar">
+            <div class="user-info">
+                <span>Connecté : <strong id="currentUserDisplay">-</strong></span>
+                <span id="userRoleBadge"></span>
+            </div>
+            <button class="btn btn-secondary btn-small" onclick="logout()" style="padding: 5px 15px;">Déconnexion</button>
+        </div>
+
+        <div class="header paper-texture">
+            <div class="header-content">
+                <div>
+                    <h1>Archives Judiciaires</h1>
+                    <div class="header-subtitle">United States Military Police - European Theater of Operations</div>
+                </div>
+                <div class="date-stamp">
+                    <div>1944</div>
+                    <div id="currentDate"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="casiers" onclick="switchTab('casiers')">Casiers</button>
+            <button class="nav-tab admin-only hidden" data-tab="sanctions" onclick="switchTab('sanctions')">Sanctions</button>
+            <button class="nav-tab mp-only hidden" data-tab="rapports" onclick="switchTab('rapports')">Rapports</button>
+            <button class="nav-tab mp-only hidden" data-tab="gestion" onclick="switchTab('gestion')">Gestion</button>
+            <button class="nav-tab admin-only hidden" data-tab="admin" onclick="switchTab('admin')">Administration</button>
+        </div>
+
+        <div class="main-panel paper-texture">
+            <div id="tab-casiers" class="tab-content">
+                <div class="section-title">Recherche de Casier Judiciaire</div>
+                <div class="stats-grid" id="statsGrid"></div>
+                <div class="search-box">
+                    <input type="text" id="searchCasier" class="form-input" placeholder="Nom, SteamID ou n° de sanction..." onkeypress="if(event.key==='Enter')searchCasier()">
+                    <button class="btn btn-primary" onclick="searchCasier()">Rechercher</button>
+                </div>
+                <div id="casierResult"></div>
+            </div>
+
+            <div id="tab-sanctions" class="tab-content hidden">
+                <div class="section-title">Registre des Sanctions</div>
+                <div class="search-box">
+                    <input type="text" id="searchSanction" class="form-input" placeholder="Rechercher par faute ou n° de sanction..." onkeypress="if(event.key==='Enter')loadSanctions()">
+                    <button class="btn btn-primary" onclick="loadSanctions()">Rechercher</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>ID</th><th>Nom Prénom</th><th>Faute</th><th>Sanction</th><th>Division</th><th>Date</th><th>MP</th><th class="admin-only hidden">Actions</th></tr>
+                    </thead>
+                    <tbody id="sanctionTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-rapports" class="tab-content hidden">
+                <div class="section-title">Rapports d'Intervention</div>
+                <div class="search-box">
+                    <input type="text" id="searchRapport" class="form-input" placeholder="Rechercher un rapport..." onkeypress="if(event.key==='Enter')loadRapports()">
+                    <select id="filterRapportType" class="form-select" style="width:200px" onchange="loadRapports()">
+                        <option value="">Tous les types</option>
+                        <option value="Interrogatoire">Interrogatoire</option>
+                        <option value="Incident">Incident</option>
+                        <option value="Arrestation">Arrestation</option>
+                        <option value="Capture">Capture</option>
+                        <option value="Patrouille">Patrouille</option>
+                        <option value="Enquête">Enquête</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadRapports()">Rechercher</button>
+                    <button class="btn btn-primary mp-only hidden" onclick="openCreateRapport()">+ Créer un Rapport</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>ID</th><th>Type</th><th>Titre</th><th>MP en charge</th><th>Date</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="rapportTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-gestion" class="tab-content hidden">
+                <div class="section-title">Gestion des Archives</div>
+                
+                <div class="detail-card">
+                    <h3>Ajouter un Individu</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nom Prénom</label>
+                            <input type="text" id="newJoueurNom" class="form-input" oninput="checkJoueurExists()">
+                            <div id="joueurExistsWarning" style="color:var(--stamp-red);font-size:12px;margin-top:5px"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SteamID</label>
+                            <input type="text" id="newJoueurSteamid" class="form-input" placeholder="STEAM_0:X:XXXXXXXX" oninput="checkSteamidExists()">
+                            <div id="steamidExistsWarning" style="color:var(--stamp-red);font-size:12px;margin-top:5px"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Division</label>
+                            <select id="newJoueurDivision" class="form-select division-select">
+                                <option value="1st">1st</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">État-Major</label>
+                            <select id="newJoueurEtatMajor" class="form-select">
+                                <option value="false">Non</option>
+                                <option value="true">Oui (Confidentiel)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addJoueur()">Enregistrer</button>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Ajouter une Sanction</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Rechercher l'individu</label>
+                            <input type="text" id="searchSanctionJoueur" class="form-input" placeholder="Tapez un nom..." oninput="searchJoueurForSanction()">
+                            <div id="joueurSearchResults" style="margin-top:5px"></div>
+                            <input type="hidden" id="selectedJoueurId">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Faute commise</label>
+                            <input type="text" id="newSanctionFaute" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sanction appliquée</label>
+                            <input type="text" id="newSanctionType" class="form-input" placeholder="ex: 10h prison">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Durée (jours)</label>
+                            <input type="number" id="newSanctionDuree" class="form-input" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sanctionneur</label>
+                            <input type="text" id="newSanctionSanctionneur" class="form-input">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addSanction()">Enregistrer</button>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Personnes à Convoquer (3+ sanctions)</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Nom</th><th>Division</th><th>Sanctions</th><th>Actions</th></tr></thead>
+                        <tbody id="convocationTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-admin" class="tab-content hidden">
+                <div class="section-title">Administration</div>
+                
+                <div class="detail-card">
+                    <h3>Gérer les Divisions</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nouvelle Division</label>
+                            <input type="text" id="newDivisionName" class="form-input" placeholder="Ex: 82nd">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addDivision()">Ajouter</button>
+                    <div style="margin-top:15px">
+                        <table class="data-table">
+                            <thead><tr><th>Nom</th><th>Joueurs</th><th>Actions</th></tr></thead>
+                            <tbody id="divisionTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Créer un Compte MP</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Identifiant</label>
+                            <input type="text" id="newUserUsername" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mot de passe</label>
+                            <input type="password" id="newUserPassword" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rôle</label>
+                            <select id="newUserRole" class="form-select">
+                                <option value="mp">MP Standard</option>
+                                <option value="admin">Administrateur</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addUser()">Créer</button>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Comptes Existants</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Identifiant</th><th>Rôle</th><th>Actions</th></tr></thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">Confirmation</h3>
+            <div id="modalBody"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-danger" id="modalConfirmBtn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rapportModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:700px;max-height:90vh;overflow-y:auto">
+            <h3 class="modal-title">Nouveau Rapport</h3>
+            
+            <div class="form-group">
+                <label class="form-label">Type de Rapport</label>
+                <select id="newRapportType" class="form-select" onchange="updateRapportTemplate()">
+                    <option value="">-- Sélectionner un type --</option>
+                    <option value="Interrogatoire">Interrogatoire</option>
+                    <option value="Incident">Incident</option>
+                    <option value="Arrestation">Arrestation</option>
+                    <option value="Capture">Capture</option>
+                    <option value="Patrouille">Patrouille</option>
+                    <option value="Enquête">Enquête</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <div id="rapportTemplateContainer"></div>
+
+            <div class="modal-actions" style="margin-top:20px">
+                <button class="btn btn-secondary" onclick="closeRapportModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitRapport()">Enregistrer le Rapport</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editJoueurModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:500px">
+            <h3 class="modal-title">Modifier le Joueur</h3>
+            <input type="hidden" id="editJoueurId">
+            <div class="form-group">
+                <label class="form-label">Nom Prénom</label>
+                <input type="text" id="editJoueurNom" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">SteamID</label>
+                <input type="text" id="editJoueurSteamid" class="form-input">
+                <div id="editSteamidWarning" style="color:var(--stamp-red);font-size:12px;margin-top:5px"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Division</label>
+                <select id="editJoueurDivision" class="form-select division-select"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">État-Major</label>
+                <select id="editJoueurEtatMajor" class="form-select">
+                    <option value="false">Non</option>
+                    <option value="true">Oui (Confidentiel)</option>
+                </select>
+            </div>
+            <div class="modal-actions" style="margin-top:20px">
+                <button class="btn btn-secondary" onclick="closeEditJoueurModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveJoueur()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ppdtxpxnfkqckqgvbylp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwZHR4cHhuZmtxY2txZ3ZieWxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTk0NzYsImV4cCI6MjA4MDg3NTQ3Nn0.cfhdxSUhpKA0b0yKyEv8mhk-VoHajJyYuvh1qhiQr6E';
+        const SALT = 'MP_SALT_1944';
+        let DIVISIONS = ['1st', '101st', '3rd', '783rd', '188th', 'FFL']; // Valeurs par défaut, chargées depuis Supabase
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let currentUser = null;
+        let isPublicMode = false;
+        let selectedPersonnesIds = [];
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + SALT);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Générer un ID unique à 6 chiffres
+        async function generateUniqueSanctionId() {
+            let unique = false;
+            let id;
+            while (!unique) {
+                id = Math.floor(100000 + Math.random() * 900000).toString();
+                const { data } = await supabase.from('sanctions').select('sanction_id').eq('sanction_id', id);
+                if (!data || data.length === 0) unique = true;
+            }
+            return id;
+        }
+
+        async function init() {
+            const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            document.getElementById('currentDate').textContent = `${new Date().getDate()} ${months[new Date().getMonth()]}`;
+            await loadDivisions();
+        }
+
+        async function loadDivisions() {
+            const { data, error } = await supabase.from('divisions').select('nom').order('nom');
+            if (data && data.length > 0) {
+                DIVISIONS = data.map(d => d.nom);
+            }
+            updateDivisionSelects();
+        }
+
+        function updateDivisionSelects() {
+            const selects = document.querySelectorAll('.division-select');
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = DIVISIONS.map(d => `<option value="${d}">${d}</option>`).join('');
+                if (currentValue && DIVISIONS.includes(currentValue)) select.value = currentValue;
+            });
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!username || !password) { document.getElementById('loginError').textContent = 'Remplissez tous les champs'; return; }
+
+            showLoading(true, 'Vérification...');
+            const passwordHash = await hashPassword(password);
+            const { data, error } = await supabase.from('users').select('*').eq('username', username).eq('password_hash', passwordHash).single();
+            showLoading(false);
+
+            if (error || !data) { document.getElementById('loginError').textContent = 'Identifiants incorrects'; return; }
+            currentUser = data;
+            isPublicMode = false;
+            showMainApp();
+        }
+
+        function enterPublicMode() { isPublicMode = true; currentUser = null; showMainApp(); }
+
+        function logout() {
+            currentUser = null; isPublicMode = false;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+
+            if (isPublicMode) {
+                document.getElementById('currentUserDisplay').textContent = 'Consultation Publique';
+                document.getElementById('userRoleBadge').innerHTML = '';
+            } else {
+                document.getElementById('currentUserDisplay').textContent = currentUser.username;
+                document.getElementById('userRoleBadge').innerHTML = currentUser.role === 'admin' ? '<span class="user-badge admin">Admin</span>' : '<span class="user-badge mp">MP</span>';
+            }
+
+            document.querySelectorAll('.mp-only').forEach(el => el.classList.toggle('hidden', isPublicMode));
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', isPublicMode || currentUser?.role !== 'admin'));
+            refreshAllData();
+            switchTab('casiers');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        }
+
+        function showLoading(show, text = 'Chargement...') {
+            document.getElementById('loadingOverlay').querySelector('.loading-text').textContent = text;
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        }
+
+        function showToast(msg) {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showModal(title, body, onConfirm) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = body;
+            document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
+            document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+            document.getElementById('modal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        // ========== RAPPORT MODAL ==========
+        let interrogatoireQuestions = [];
+
+        function openCreateRapport() {
+            document.getElementById('newRapportType').value = '';
+            document.getElementById('rapportTemplateContainer').innerHTML = '<p style="text-align:center;color:var(--ink-faded)">Sélectionnez un type de rapport</p>';
+            selectedPersonnesIds = [];
+            interrogatoireQuestions = [];
+            document.getElementById('rapportModal').classList.remove('hidden');
+        }
+
+        function closeRapportModal() {
+            document.getElementById('rapportModal').classList.add('hidden');
+        }
+
+        function updateRapportTemplate() {
+            const type = document.getElementById('newRapportType').value;
+            const container = document.getElementById('rapportTemplateContainer');
+            selectedPersonnesIds = [];
+            interrogatoireQuestions = [];
+
+            if (!type) {
+                container.innerHTML = '<p style="text-align:center;color:var(--ink-faded)">Sélectionnez un type de rapport</p>';
+                return;
+            }
+
+            let html = `
+                <div class="form-group">
+                    <label class="form-label">Titre du Rapport</label>
+                    <input type="text" id="rapportTitre" class="form-input" placeholder="Ex: ${type} de John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">MP en charge</label>
+                    <input type="text" id="rapportMP" class="form-input" value="${currentUser?.username || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date et Heure</label>
+                    <input type="datetime-local" id="rapportDate" class="form-input" value="${new Date().toISOString().slice(0,16)}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lieu</label>
+                    <input type="text" id="rapportLieu" class="form-input" placeholder="Ex: Base MP, Secteur B3...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Personnes impliquées</label>
+                    <input type="text" id="searchRapportPersonnes" class="form-input" placeholder="Tapez un nom..." oninput="searchJoueurForRapport()">
+                    <div id="rapportPersonnesResults" style="margin-top:5px"></div>
+                    <div id="selectedPersonnes" style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px"></div>
+                </div>
+            `;
+
+            switch(type) {
+                case 'Interrogatoire':
+                    html += `
+                        <div class="detail-card" style="margin-top:15px">
+                            <h3>Questions / Réponses</h3>
+                            <div id="interrogatoireQR"></div>
+                            <button type="button" class="btn btn-secondary" onclick="addQuestion()" style="margin-top:10px">+ Ajouter une Question</button>
+                        </div>
+                        <div class="form-group" style="margin-top:15px">
+                            <label class="form-label">Conclusions / Remarques</label>
+                            <textarea id="rapportConclusion" class="form-input" style="min-height:80px" placeholder="Conclusions de l'interrogatoire..."></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'Arrestation':
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Motif de l'arrestation</label>
+                            <input type="text" id="rapportMotif" class="form-input" placeholder="Ex: Insubordination, Vol...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Résistance à l'arrestation</label>
+                            <select id="rapportResistance" class="form-select">
+                                <option value="Non">Non</option>
+                                <option value="Verbale">Verbale uniquement</option>
+                                <option value="Physique">Physique</option>
+                                <option value="Armée">Armée</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Déroulement de l'arrestation</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:120px" placeholder="Décrivez le déroulement..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Objets saisis</label>
+                            <textarea id="rapportObjets" class="form-input" style="min-height:60px" placeholder="Liste des objets confisqués..."></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'Incident':
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Type d'incident</label>
+                            <input type="text" id="rapportTypeIncident" class="form-input" placeholder="Ex: Bagarre, Tir accidentel...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description de l'incident</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:150px" placeholder="Décrivez l'incident..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Blessés / Dégâts</label>
+                            <textarea id="rapportDegats" class="form-input" style="min-height:60px" placeholder="Liste des blessés et/ou dégâts..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mesures prises</label>
+                            <textarea id="rapportMesures" class="form-input" style="min-height:60px" placeholder="Actions entreprises..."></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'Capture':
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Type de prisonnier</label>
+                            <select id="rapportTypePrisonnier" class="form-select">
+                                <option value="Soldat ennemi">Soldat ennemi</option>
+                                <option value="Officier ennemi">Officier ennemi</option>
+                                <option value="Civil suspect">Civil suspect</option>
+                                <option value="Espion">Espion présumé</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Circonstances de la capture</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:120px" placeholder="Décrivez les circonstances..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Équipement / Documents saisis</label>
+                            <textarea id="rapportObjets" class="form-input" style="min-height:60px" placeholder="Liste du matériel..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Lieu de détention</label>
+                            <input type="text" id="rapportDetention" class="form-input" placeholder="Ex: Cellule MP...">
+                        </div>
+                    `;
+                    break;
+                case 'Patrouille':
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Secteur patrouillé</label>
+                            <input type="text" id="rapportSecteur" class="form-input" placeholder="Ex: Secteur A1-A3...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Durée de la patrouille</label>
+                            <input type="text" id="rapportDuree" class="form-input" placeholder="Ex: 2 heures">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Compte-rendu de patrouille</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:150px" placeholder="Événements observés, RAS..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Anomalies signalées</label>
+                            <textarea id="rapportAnomalies" class="form-input" style="min-height:60px" placeholder="Comportements suspects..."></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'Enquête':
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Objet de l'enquête</label>
+                            <input type="text" id="rapportObjetEnquete" class="form-input" placeholder="Ex: Vol de matériel...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Éléments recueillis</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:150px" placeholder="Témoignages, preuves..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Suspects identifiés</label>
+                            <textarea id="rapportSuspects" class="form-input" style="min-height:60px" placeholder="Liste des suspects..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Conclusions / Suite à donner</label>
+                            <textarea id="rapportConclusion" class="form-input" style="min-height:80px" placeholder="État de l'enquête..."></textarea>
+                        </div>
+                    `;
+                    break;
+                default:
+                    html += `
+                        <div class="form-group">
+                            <label class="form-label">Contenu du Rapport</label>
+                            <textarea id="rapportContenu" class="form-input" style="min-height:200px" placeholder="Rédigez votre rapport..."></textarea>
+                        </div>
+                    `;
+            }
+
+            container.innerHTML = html;
+            if (type === 'Interrogatoire') addQuestion();
+        }
+
+        function addQuestion() {
+            const qIndex = interrogatoireQuestions.length;
+            interrogatoireQuestions.push({ question: '', reponse: '' });
+            
+            const container = document.getElementById('interrogatoireQR');
+            const div = document.createElement('div');
+            div.id = `qr-${qIndex}`;
+            div.style.cssText = 'background:rgba(255,255,255,0.3);border:1px solid var(--border-dark);padding:15px;margin-bottom:10px;position:relative';
+            div.innerHTML = `
+                <button type="button" onclick="removeQuestion(${qIndex})" style="position:absolute;top:5px;right:5px;background:var(--stamp-red);color:white;border:none;padding:2px 8px;cursor:pointer;font-size:12px">×</button>
+                <div class="form-group" style="margin-bottom:10px">
+                    <label class="form-label">Question ${qIndex + 1}</label>
+                    <input type="text" class="form-input" id="q-${qIndex}" placeholder="Posez votre question..." oninput="updateQuestion(${qIndex})">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Réponse</label>
+                    <textarea class="form-input" id="r-${qIndex}" style="min-height:60px" placeholder="Réponse de l'interrogé..." oninput="updateQuestion(${qIndex})"></textarea>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeQuestion(index) {
+            const div = document.getElementById(`qr-${index}`);
+            if (div) div.remove();
+            interrogatoireQuestions[index] = null;
+        }
+
+        function updateQuestion(index) {
+            const q = document.getElementById(`q-${index}`)?.value || '';
+            const r = document.getElementById(`r-${index}`)?.value || '';
+            if (interrogatoireQuestions[index]) {
+                interrogatoireQuestions[index] = { question: q, reponse: r };
+            }
+        }
+
+        let searchRapportTimeout;
+        async function searchJoueurForRapport() {
+            clearTimeout(searchRapportTimeout);
+            searchRapportTimeout = setTimeout(async () => {
+                const search = document.getElementById('searchRapportPersonnes')?.value?.trim();
+                if (!search || search.length < 2) { document.getElementById('rapportPersonnesResults').innerHTML = ''; return; }
+                
+                const { data } = await supabase.from('joueurs').select('id, nom, division').or(`nom.ilike.%${search}%,steamid.ilike.%${search}%`).limit(5);
+                
+                if (data && data.length > 0) {
+                    document.getElementById('rapportPersonnesResults').innerHTML = data.map(j => 
+                        `<button type="button" class="btn btn-secondary btn-small" style="margin:2px" onclick="addPersonneToRapport(${j.id}, '${j.nom.replace(/'/g, "\\'")}')">+ ${j.nom}</button>`
+                    ).join('');
+                } else {
+                    document.getElementById('rapportPersonnesResults').innerHTML = '<span style="color:var(--ink-faded)">Aucun résultat</span>';
+                }
+            }, 300);
+        }
+
+        function addPersonneToRapport(id, nom) {
+            if (selectedPersonnesIds.find(p => p.id === id)) return;
+            selectedPersonnesIds.push({ id, nom });
+            updateSelectedPersonnes();
+            document.getElementById('searchRapportPersonnes').value = '';
+            document.getElementById('rapportPersonnesResults').innerHTML = '';
+        }
+
+        function removePersonneFromRapport(id) {
+            selectedPersonnesIds = selectedPersonnesIds.filter(p => p.id !== id);
+            updateSelectedPersonnes();
+        }
+
+        function updateSelectedPersonnes() {
+            const container = document.getElementById('selectedPersonnes');
+            if (container) {
+                container.innerHTML = selectedPersonnesIds.map(p => 
+                    `<span class="user-badge mp" style="cursor:pointer" onclick="removePersonneFromRapport(${p.id})">${p.nom} ×</span>`
+                ).join('');
+            }
+        }
+
+        async function submitRapport() {
+            const type = document.getElementById('newRapportType').value;
+            const titre = document.getElementById('rapportTitre')?.value?.trim();
+            const mp = document.getElementById('rapportMP')?.value?.trim() || currentUser.username;
+            const date = document.getElementById('rapportDate')?.value;
+            const lieu = document.getElementById('rapportLieu')?.value?.trim();
+
+            if (!type) { showToast('Sélectionnez un type'); return; }
+            if (!titre) { showToast('Entrez un titre'); return; }
+
+            let contenu = `📅 Date: ${date}\n📍 Lieu: ${lieu}\n\n`;
+            
+            switch(type) {
+                case 'Interrogatoire':
+                    const questions = interrogatoireQuestions.filter(q => q !== null && q.question);
+                    contenu += `━━━━━━ INTERROGATOIRE ━━━━━━\n\n`;
+                    questions.forEach((q, i) => {
+                        contenu += `❓ Q${i+1}: ${q.question}\n`;
+                        contenu += `💬 R: ${q.reponse || '(Pas de réponse)'}\n\n`;
+                    });
+                    const conclusion = document.getElementById('rapportConclusion')?.value?.trim();
+                    if (conclusion) contenu += `━━━━━━ CONCLUSIONS ━━━━━━\n${conclusion}`;
+                    break;
+                case 'Arrestation':
+                    contenu += `⚖️ Motif: ${document.getElementById('rapportMotif')?.value || 'N/A'}\n`;
+                    contenu += `🚨 Résistance: ${document.getElementById('rapportResistance')?.value || 'Non'}\n\n`;
+                    contenu += `━━━━━━ DÉROULEMENT ━━━━━━\n${document.getElementById('rapportContenu')?.value || ''}\n\n`;
+                    const objets = document.getElementById('rapportObjets')?.value?.trim();
+                    if (objets) contenu += `━━━━━━ OBJETS SAISIS ━━━━━━\n${objets}`;
+                    break;
+                case 'Incident':
+                    contenu += `⚠️ Type: ${document.getElementById('rapportTypeIncident')?.value || 'N/A'}\n\n`;
+                    contenu += `━━━━━━ DESCRIPTION ━━━━━━\n${document.getElementById('rapportContenu')?.value || ''}\n\n`;
+                    const degats = document.getElementById('rapportDegats')?.value?.trim();
+                    if (degats) contenu += `━━━━━━ BLESSÉS / DÉGÂTS ━━━━━━\n${degats}\n\n`;
+                    const mesures = document.getElementById('rapportMesures')?.value?.trim();
+                    if (mesures) contenu += `━━━━━━ MESURES PRISES ━━━━━━\n${mesures}`;
+                    break;
+                case 'Capture':
+                    contenu += `👤 Type: ${document.getElementById('rapportTypePrisonnier')?.value || 'N/A'}\n`;
+                    contenu += `🔒 Détention: ${document.getElementById('rapportDetention')?.value || 'N/A'}\n\n`;
+                    contenu += `━━━━━━ CIRCONSTANCES ━━━━━━\n${document.getElementById('rapportContenu')?.value || ''}\n\n`;
+                    const objetsCap = document.getElementById('rapportObjets')?.value?.trim();
+                    if (objetsCap) contenu += `━━━━━━ ÉQUIPEMENT SAISI ━━━━━━\n${objetsCap}`;
+                    break;
+                case 'Patrouille':
+                    contenu += `🗺️ Secteur: ${document.getElementById('rapportSecteur')?.value || 'N/A'}\n`;
+                    contenu += `⏱️ Durée: ${document.getElementById('rapportDuree')?.value || 'N/A'}\n\n`;
+                    contenu += `━━━━━━ COMPTE-RENDU ━━━━━━\n${document.getElementById('rapportContenu')?.value || ''}\n\n`;
+                    const anomalies = document.getElementById('rapportAnomalies')?.value?.trim();
+                    if (anomalies) contenu += `━━━━━━ ANOMALIES ━━━━━━\n${anomalies}`;
+                    break;
+                case 'Enquête':
+                    contenu += `🔍 Objet: ${document.getElementById('rapportObjetEnquete')?.value || 'N/A'}\n\n`;
+                    contenu += `━━━━━━ ÉLÉMENTS RECUEILLIS ━━━━━━\n${document.getElementById('rapportContenu')?.value || ''}\n\n`;
+                    const suspects = document.getElementById('rapportSuspects')?.value?.trim();
+                    if (suspects) contenu += `━━━━━━ SUSPECTS ━━━━━━\n${suspects}\n\n`;
+                    const conclEnq = document.getElementById('rapportConclusion')?.value?.trim();
+                    if (conclEnq) contenu += `━━━━━━ CONCLUSIONS ━━━━━━\n${conclEnq}`;
+                    break;
+                default:
+                    contenu += document.getElementById('rapportContenu')?.value || '';
+            }
+
+            await supabase.from('rapports').insert({
+                type, titre, mp_en_charge: mp, contenu,
+                personnes_impliquees: JSON.stringify(selectedPersonnesIds),
+                lien: ''
+            }).then(({ data, error }) => {
+                if (error) {
+                    console.error('Erreur insertion rapport:', error);
+                    showToast('Erreur: ' + error.message);
+                } else {
+                    showToast('Rapport enregistré');
+                    closeRapportModal();
+                    loadRapports();
+                }
+            });
+        }
+
+        async function refreshAllData() {
+            await loadDivisions();
+            await loadStats();
+            await loadSanctions();
+            await loadRapports();
+            if (!isPublicMode) { 
+                await loadConvocations(); 
+                if (currentUser?.role === 'admin') {
+                    await loadUsers();
+                    await loadDivisionsAdmin();
+                }
+            }
+        }
+
+        async function loadStats() {
+            let html = '', total = 0;
+            for (const div of DIVISIONS) {
+                const { count } = await supabase.from('sanctions').select('*, joueurs!inner(division)', { count: 'exact', head: true }).eq('joueurs.division', div);
+                total += count || 0;
+                html += `<div class="stat-box"><div class="unit-name">${div}</div><div class="stat-number">${count || 0}</div></div>`;
+            }
+            html += `<div class="stat-box" style="background:var(--army-green);color:var(--paper-cream)"><div class="unit-name">Total</div><div class="stat-number" style="color:var(--paper-cream)">${total}</div></div>`;
+            document.getElementById('statsGrid').innerHTML = html;
+        }
+
+        // Recherche unifiée de casier
+        async function searchCasier() {
+            const search = document.getElementById('searchCasier').value.trim();
+            if (!search) { 
+                document.getElementById('casierResult').innerHTML = '<p style="text-align:center;color:var(--ink-faded)">Entrez un nom, SteamID ou numéro de sanction pour rechercher</p>'; 
+                return; 
+            }
+
+            let joueurs = [];
+
+            // Chercher par numéro de sanction d'abord
+            const { data: sanctionMatch } = await supabase.from('sanctions').select('joueur_id').eq('sanction_id', search);
+            if (sanctionMatch && sanctionMatch.length > 0) {
+                const joueurIds = [...new Set(sanctionMatch.map(s => s.joueur_id))];
+                const { data } = await supabase.from('joueurs').select('*').in('id', joueurIds);
+                joueurs = data || [];
+            }
+
+            // Sinon chercher par nom/SteamID
+            if (joueurs.length === 0) {
+                const { data } = await supabase.from('joueurs').select('*').or(`nom.ilike.%${search}%,steamid.ilike.%${search}%`);
+                joueurs = data || [];
+            }
+            
+            if (!joueurs || joueurs.length === 0) {
+                document.getElementById('casierResult').innerHTML = '<div class="detail-card"><p style="text-align:center">Aucun casier trouvé pour cette recherche</p></div>';
+                return;
+            }
+
+            let html = '';
+            for (const j of joueurs) {
+                if (j.etat_major && isPublicMode) {
+                    html += `<div class="detail-card">
+                        <h3>${j.nom}</h3>
+                        <span class="stamp-confidential">CONFIDENTIEL - Référer à la Military Police</span>
+                    </div>`;
+                    continue;
+                }
+
+                // Charger les sanctions
+                const { data: sanctions } = await supabase.from('sanctions').select('*').eq('joueur_id', j.id).order('date_debut', { ascending: false });
+                const { count } = await supabase.from('sanctions').select('*', { count: 'exact', head: true }).eq('joueur_id', j.id);
+                
+                // Charger les rapports où la personne est impliquée
+                const { data: rapports } = await supabase.from('rapports').select('*').order('created_at', { ascending: false });
+                const rapportsLies = (rapports || []).filter(r => {
+                    if (!r.personnes_impliquees) return false;
+                    try {
+                        const personnes = JSON.parse(r.personnes_impliquees);
+                        return personnes.some(p => p.id === j.id);
+                    } catch { return false; }
+                });
+
+                const badge = j.convoque ? '<span class="badge-convocation">À CONVOQUER</span>' : '';
+                
+                // HTML des sanctions
+                let sanctionsHtml = '';
+                for (const s of sanctions || []) {
+                    const highlighted = s.sanction_id === search ? 'style="background:rgba(139,35,35,0.2)"' : '';
+                    sanctionsHtml += `<tr ${highlighted}>
+                        <td>n°${s.sanction_id || s.id}</td>
+                        <td>${s.faute}</td>
+                        <td>${s.sanction}</td>
+                        <td>${s.date_debut || 'N/A'}</td>
+                        <td>${s.date_fin || 'N/A'}</td>
+                        <td>${s.mp_en_charge || 'N/A'}</td>
+                        <td>${s.sanctionneur || 'N/A'}</td>
+                        ${currentUser?.role === 'admin' ? `<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>` : ''}
+                    </tr>`;
+                }
+                if (!sanctionsHtml) sanctionsHtml = '<tr><td colspan="8" style="text-align:center">Aucune sanction enregistrée</td></tr>';
+
+                // HTML des rapports liés
+                let rapportsHtml = '';
+                for (const r of rapportsLies) {
+                    rapportsHtml += `<tr>
+                        <td>n°${r.id}</td>
+                        <td><span class="user-badge ${r.type === 'Arrestation' ? 'admin' : 'mp'}">${r.type || 'Autre'}</span></td>
+                        <td>${r.titre || 'Sans titre'}</td>
+                        <td>${r.mp_en_charge || 'N/A'}</td>
+                        <td>${r.created_at?.split('T')[0] || 'N/A'}</td>
+                        <td><button class="btn btn-secondary btn-small" onclick="viewRapport(${r.id})">Voir</button></td>
+                    </tr>`;
+                }
+                if (!rapportsHtml) rapportsHtml = '<tr><td colspan="6" style="text-align:center">Aucun rapport lié</td></tr>';
+
+                html += `<div class="detail-card">
+                    <h3>Casier Judiciaire ${badge}</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px">
+                        <div><strong>Nom:</strong> ${j.nom}</div>
+                        <div><strong>SteamID:</strong> ${j.steamid}</div>
+                        <div><strong>Division:</strong> ${j.division}</div>
+                        <div><strong>Nombre de sanctions:</strong> ${count || 0}</div>
+                        <div><strong>État-Major:</strong> ${j.etat_major ? 'Oui' : 'Non'}</div>
+                        <div><strong>Rapports liés:</strong> ${rapportsLies.length}</div>
+                    </div>
+                    
+                    <h4 style="font-family:'Special Elite';margin-bottom:10px">📋 Historique des Sanctions</h4>
+                    <table class="data-table">
+                        <thead><tr>
+                            <th>N° Sanction</th>
+                            <th>Faute</th>
+                            <th>Sanction</th>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>MP</th>
+                            <th>Sanctionneur</th>
+                            ${currentUser?.role === 'admin' ? '<th>Actions</th>' : ''}
+                        </tr></thead>
+                        <tbody>${sanctionsHtml}</tbody>
+                    </table>
+
+                    <h4 style="font-family:'Special Elite';margin:20px 0 10px 0">📄 Rapports Impliquant cette Personne</h4>
+                    <table class="data-table">
+                        <thead><tr>
+                            <th>N°</th>
+                            <th>Type</th>
+                            <th>Titre</th>
+                            <th>MP</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr></thead>
+                        <tbody>${rapportsHtml}</tbody>
+                    </table>
+                    
+                    ${!isPublicMode ? `<div style="margin-top:15px">
+                        ${currentUser?.role === 'admin' ? `<button class="btn btn-secondary btn-small" onclick="openEditJoueur(${j.id})">✏️ Modifier les infos</button>` : ''}
+                        <button class="btn btn-danger btn-small" onclick="deleteJoueur(${j.id})">Supprimer ce casier</button>
+                    </div>` : ''}
+                </div>`;
+            }
+
+            document.getElementById('casierResult').innerHTML = html;
+        }
+
+        async function loadSanctions() {
+            const search = document.getElementById('searchSanction')?.value || '';
+            let query = supabase.from('sanctions').select('*, joueurs(nom, division, etat_major)');
+            if (search) query = query.or(`faute.ilike.%${search}%,sanction_id.eq.${search}`);
+            const { data } = await query.order('date_debut', { ascending: false });
+            let html = '';
+            for (const s of data || []) {
+                if (s.joueurs?.etat_major && isPublicMode) continue;
+                const nomLink = s.joueurs?.nom ? `<button class="link-btn" onclick="document.getElementById('searchCasier').value='${s.joueurs.nom.replace(/'/g, "\\'")}';searchCasier();switchTab('casiers');">${s.joueurs.nom}</button>` : 'N/A';
+                html += `<tr>
+                    <td>n°${s.sanction_id || s.id}</td>
+                    <td>${nomLink}</td>
+                    <td>${s.faute}</td>
+                    <td>${s.sanction}</td>
+                    <td>${s.joueurs?.division||'N/A'}</td>
+                    <td>${s.date_debut||'N/A'}</td>
+                    <td>${s.mp_en_charge||'N/A'}</td>
+                    ${currentUser?.role === 'admin'?`<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>`:''}
+                </tr>`;
+            }
+            document.getElementById('sanctionTableBody').innerHTML = html || '<tr><td colspan="8" style="text-align:center">Aucune sanction</td></tr>';
+        }
+
+        async function loadRapports() {
+            const search = document.getElementById('searchRapport')?.value || '';
+            const typeFilter = document.getElementById('filterRapportType')?.value || '';
+            
+            let query = supabase.from('rapports').select('*');
+            if (search) query = query.or(`titre.ilike.%${search}%,mp_en_charge.ilike.%${search}%,contenu.ilike.%${search}%`);
+            if (typeFilter) query = query.eq('type', typeFilter);
+            
+            const { data, error } = await query.order('created_at', { ascending: false });
+            console.log('Rapports chargés:', data, 'Erreur:', error);
+            
+            let html = '';
+            for (const r of data || []) {
+                const titre = r.titre || r.lien || 'Sans titre';
+                const titreShort = titre.length > 40 ? titre.substring(0,40)+'...' : titre;
+                html += `<tr>
+                    <td>n°${r.id}</td>
+                    <td><span class="user-badge ${r.type === 'Arrestation' ? 'admin' : 'mp'}">${r.type || 'Autre'}</span></td>
+                    <td><button class="link-btn" onclick="viewRapport(${r.id})">${titreShort}</button></td>
+                    <td>${r.mp_en_charge||'N/A'}</td>
+                    <td>${r.created_at?.split('T')[0]||'N/A'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="viewRapport(${r.id})">Voir</button>
+                        ${currentUser?.role === 'admin'?`<button class="btn btn-danger btn-small" onclick="deleteRapport(${r.id})">×</button>`:''}
+                    </td>
+                </tr>`;
+            }
+            document.getElementById('rapportTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center">Aucun rapport</td></tr>';
+        }
+
+        async function viewRapport(id) {
+            const { data: r } = await supabase.from('rapports').select('*').eq('id', id).single();
+            if (!r) return;
+
+            const personnes = r.personnes_impliquees ? JSON.parse(r.personnes_impliquees) : [];
+            let personnesHtml = personnes.length > 0 
+                ? personnes.map(p => `<span class="user-badge mp" style="cursor:pointer" onclick="closeModal();document.getElementById('searchCasier').value='${p.nom.replace(/'/g, "\\'")}';searchCasier();switchTab('casiers');">${p.nom} 🔗</span>`).join(' ') 
+                : 'Aucune';
+
+            const content = `
+                <div style="margin-bottom:15px"><strong>Type:</strong> <span class="user-badge ${r.type === 'Arrestation' ? 'admin' : 'mp'}">${r.type || 'Autre'}</span></div>
+                <div style="margin-bottom:15px"><strong>MP en charge:</strong> ${r.mp_en_charge || 'N/A'}</div>
+                <div style="margin-bottom:15px"><strong>Date:</strong> ${r.created_at?.split('T')[0] || 'N/A'}</div>
+                <div style="margin-bottom:15px"><strong>Personnes impliquées:</strong> ${personnesHtml}</div>
+                <p style="font-size:11px;color:var(--ink-faded);margin-bottom:10px">💡 Cliquez sur un nom pour voir son casier</p>
+                <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-dark)">
+                <div style="white-space:pre-wrap;font-family:'Courier Prime',monospace;background:rgba(255,255,255,0.3);padding:15px;border:1px solid var(--border-dark);max-height:300px;overflow-y:auto">${r.contenu || r.lien || 'Pas de contenu'}</div>
+            `;
+            
+            showModal(r.titre || 'Rapport', content, () => {});
+            document.getElementById('modalConfirmBtn').style.display = 'none';
+        }
+
+        async function loadConvocations() {
+            const { data: joueurs } = await supabase.from('joueurs').select('id');
+            for (const j of joueurs || []) {
+                const { count } = await supabase.from('sanctions').select('*', { count: 'exact', head: true }).eq('joueur_id', j.id);
+                await supabase.from('joueurs').update({ convoque: (count||0) >= 3 }).eq('id', j.id);
+            }
+            const { data } = await supabase.from('joueurs').select('*').eq('convoque', true);
+            let html = '';
+            for (const j of data || []) {
+                const { count } = await supabase.from('sanctions').select('*', { count: 'exact', head: true }).eq('joueur_id', j.id);
+                html += `<tr><td>${j.nom}</td><td>${j.division}</td><td><span class="badge-convocation">${count}</span></td><td><button class="btn btn-secondary btn-small" onclick="markConvoked(${j.id})">Convoqué</button></td></tr>`;
+            }
+            document.getElementById('convocationTableBody').innerHTML = html || '<tr><td colspan="4" style="text-align:center">Personne à convoquer</td></tr>';
+        }
+
+        async function markConvoked(id) { await supabase.from('joueurs').update({ convoque: false }).eq('id', id); showToast('Convocation enregistrée'); refreshAllData(); }
+
+        async function loadUsers() {
+            const { data } = await supabase.from('users').select('*').order('role');
+            let html = '';
+            for (const u of data || []) {
+                const badge = u.role === 'admin' ? '<span class="user-badge admin">Admin</span>' : '<span class="user-badge mp">MP</span>';
+                const btn = u.username !== currentUser.username ? `<button class="btn btn-danger btn-small" onclick="deleteUser(${u.id})">Supprimer</button>` : '<em>(Vous)</em>';
+                html += `<tr><td>${u.username}</td><td>${badge}</td><td>${btn}</td></tr>`;
+            }
+            document.getElementById('userTableBody').innerHTML = html;
+        }
+
+        // Vérifier si joueur existe
+        let checkJoueurTimeout;
+        async function checkJoueurExists() {
+            clearTimeout(checkJoueurTimeout);
+            checkJoueurTimeout = setTimeout(async () => {
+                const nom = document.getElementById('newJoueurNom').value.trim();
+                if (nom.length < 2) { document.getElementById('joueurExistsWarning').innerHTML = ''; return; }
+                
+                const { data } = await supabase.from('joueurs').select('nom, steamid').ilike('nom', `%${nom}%`).limit(5);
+                if (data && data.length > 0) {
+                    document.getElementById('joueurExistsWarning').innerHTML = '⚠️ Individus similaires: ' + data.map(j => `<strong>${j.nom}</strong>`).join(', ');
+                } else {
+                    document.getElementById('joueurExistsWarning').innerHTML = '<span style="color:var(--army-green)">✓ Aucun doublon trouvé</span>';
+                }
+            }, 300);
+        }
+
+        let checkSteamidTimeout;
+        async function checkSteamidExists() {
+            clearTimeout(checkSteamidTimeout);
+            checkSteamidTimeout = setTimeout(async () => {
+                const steamid = document.getElementById('newJoueurSteamid').value.trim();
+                if (steamid.length < 5) { document.getElementById('steamidExistsWarning').innerHTML = ''; return; }
+                
+                const { data } = await supabase.from('joueurs').select('nom, steamid').eq('steamid', steamid);
+                if (data && data.length > 0) {
+                    document.getElementById('steamidExistsWarning').innerHTML = `⚠️ SteamID déjà utilisé par: <strong>${data[0].nom}</strong>`;
+                } else {
+                    document.getElementById('steamidExistsWarning').innerHTML = '<span style="color:var(--army-green)">✓ SteamID disponible</span>';
+                }
+            }, 300);
+        }
+
+        // Recherche joueur pour sanction
+        let searchJoueurTimeout;
+        async function searchJoueurForSanction() {
+            clearTimeout(searchJoueurTimeout);
+            searchJoueurTimeout = setTimeout(async () => {
+                const search = document.getElementById('searchSanctionJoueur').value.trim();
+                if (search.length < 2) { document.getElementById('joueurSearchResults').innerHTML = ''; return; }
+                
+                const { data } = await supabase.from('joueurs').select('id, nom, steamid, division').or(`nom.ilike.%${search}%,steamid.ilike.%${search}%`).limit(5);
+                
+                if (data && data.length > 0) {
+                    document.getElementById('joueurSearchResults').innerHTML = data.map(j => 
+                        `<button type="button" class="btn btn-secondary btn-small" style="margin:2px" onclick="selectJoueurForSanction(${j.id}, '${j.nom.replace(/'/g, "\\'")}')">
+                            ${j.nom} (${j.division})
+                        </button>`
+                    ).join('');
+                } else {
+                    document.getElementById('joueurSearchResults').innerHTML = '<span style="color:var(--ink-faded)">Aucun résultat</span>';
+                }
+            }, 300);
+        }
+
+        function selectJoueurForSanction(id, nom) {
+            document.getElementById('selectedJoueurId').value = id;
+            document.getElementById('searchSanctionJoueur').value = nom;
+            document.getElementById('joueurSearchResults').innerHTML = `<span style="color:var(--army-green)">✓ ${nom} sélectionné</span>`;
+        }
+
+        async function addJoueur() {
+            const nom = document.getElementById('newJoueurNom').value.trim();
+            const steamid = document.getElementById('newJoueurSteamid').value.trim();
+            const division = document.getElementById('newJoueurDivision').value;
+            const etat_major = document.getElementById('newJoueurEtatMajor').value === 'true';
+            if (!nom || !steamid) { showToast('Remplissez tous les champs'); return; }
+            
+            // Vérifier si le SteamID existe déjà
+            const { data: existingSteamid } = await supabase.from('joueurs').select('id, nom').eq('steamid', steamid);
+            if (existingSteamid && existingSteamid.length > 0) {
+                showToast(`⚠️ SteamID déjà utilisé par: ${existingSteamid[0].nom}`);
+                return;
+            }
+            
+            const { error } = await supabase.from('joueurs').insert({ nom, steamid, division, etat_major });
+            if (error) { showToast('Erreur: ' + error.message); return; }
+            showToast('Individu enregistré'); 
+            document.getElementById('newJoueurNom').value = ''; 
+            document.getElementById('newJoueurSteamid').value = ''; 
+            document.getElementById('joueurExistsWarning').innerHTML = '';
+            document.getElementById('steamidExistsWarning').innerHTML = '';
+            refreshAllData();
+        }
+
+        async function addSanction() {
+            const joueur_id = document.getElementById('selectedJoueurId').value;
+            const faute = document.getElementById('newSanctionFaute').value.trim();
+            const sanction = document.getElementById('newSanctionType').value.trim();
+            const duree = parseInt(document.getElementById('newSanctionDuree').value) || 1;
+            const sanctionneur = document.getElementById('newSanctionSanctionneur').value.trim();
+            
+            if (!joueur_id) { showToast('Sélectionnez un individu'); return; }
+            if (!faute || !sanction) { showToast('Remplissez les champs'); return; }
+            
+            const sanction_id = await generateUniqueSanctionId();
+            const today = new Date().toISOString().split('T')[0];
+            const end = new Date(); end.setDate(end.getDate() + duree);
+            
+            await supabase.from('sanctions').insert({ 
+                joueur_id: parseInt(joueur_id), 
+                sanction_id,
+                faute, 
+                sanction, 
+                duree_jours: duree, 
+                date_debut: today, 
+                date_fin: end.toISOString().split('T')[0], 
+                mp_en_charge: currentUser.username, 
+                sanctionneur 
+            });
+            
+            showToast(`Sanction n°${sanction_id} enregistrée`); 
+            document.getElementById('searchSanctionJoueur').value = '';
+            document.getElementById('selectedJoueurId').value = '';
+            document.getElementById('joueurSearchResults').innerHTML = '';
+            document.getElementById('newSanctionFaute').value = ''; 
+            document.getElementById('newSanctionType').value = ''; 
+            document.getElementById('newSanctionSanctionneur').value = ''; 
+            refreshAllData();
+        }
+
+        async function deleteSanction(id) { 
+            if (currentUser?.role !== 'admin') { showToast('⚠️ Seuls les admins peuvent supprimer'); return; }
+            showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('sanctions').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); searchCasier(); }); 
+        }
+        async function deleteRapport(id) { 
+            if (currentUser?.role !== 'admin') { showToast('⚠️ Seuls les admins peuvent supprimer'); return; }
+            showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('rapports').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); }); 
+        }
+        async function deleteJoueur(id) { showModal('Supprimer', 'Supprimer casier et sanctions ?', async () => { await supabase.from('sanctions').delete().eq('joueur_id', id); await supabase.from('joueurs').delete().eq('id', id); showToast('Supprimé'); document.getElementById('casierResult').innerHTML = ''; refreshAllData(); }); }
+
+        async function addUser() {
+            const username = document.getElementById('newUserUsername').value.trim();
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            if (!username || !password) { showToast('Remplissez les champs'); return; }
+            const password_hash = await hashPassword(password);
+            const { error } = await supabase.from('users').insert({ username, password_hash, role });
+            if (error) { showToast('Identifiant existant'); return; }
+            showToast('Compte créé'); document.getElementById('newUserUsername').value = ''; document.getElementById('newUserPassword').value = ''; loadUsers();
+        }
+
+        async function deleteUser(id) { 
+            // Vérifier qu'on ne supprime pas le dernier admin
+            const { data: admins } = await supabase.from('users').select('id').eq('role', 'admin');
+            const { data: userToDelete } = await supabase.from('users').select('role').eq('id', id).single();
+            
+            if (userToDelete?.role === 'admin' && admins?.length <= 1) {
+                showToast('⚠️ Impossible de supprimer le dernier admin !');
+                return;
+            }
+            
+            showModal('Supprimer', 'Confirmer la suppression de ce compte ?', async () => { 
+                await supabase.from('users').delete().eq('id', id); 
+                showToast('Compte supprimé'); 
+                loadUsers(); 
+            }); 
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+        document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+        document.getElementById('loginUsername').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+
+        // ========== GESTION DES DIVISIONS ==========
+        async function loadDivisionsAdmin() {
+            const { data } = await supabase.from('divisions').select('*').order('nom');
+            let html = '';
+            for (const d of data || []) {
+                // Compter les joueurs dans cette division
+                const { count } = await supabase.from('joueurs').select('*', { count: 'exact', head: true }).eq('division', d.nom);
+                html += `<tr>
+                    <td><input type="text" class="form-input" value="${d.nom}" id="divName_${d.id}" data-old-name="${d.nom}" style="width:150px"></td>
+                    <td style="color:var(--ink-faded);font-size:12px">${count || 0} joueur(s)</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="saveDivision(${d.id})">💾</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteDivision(${d.id}, '${d.nom}')">×</button>
+                    </td>
+                </tr>`;
+            }
+            document.getElementById('divisionTableBody').innerHTML = html || '<tr><td colspan="3">Aucune division</td></tr>';
+        }
+
+        async function addDivision() {
+            const nom = document.getElementById('newDivisionName').value.trim();
+            if (!nom) { showToast('Entrez un nom de division'); return; }
+            
+            const { error } = await supabase.from('divisions').insert({ nom });
+            if (error) { showToast('Erreur: ' + (error.message.includes('duplicate') ? 'Division existe déjà' : error.message)); return; }
+            
+            showToast('Division ajoutée');
+            document.getElementById('newDivisionName').value = '';
+            await loadDivisions();
+            await loadDivisionsAdmin();
+            await loadStats();
+        }
+
+        async function saveDivision(id) {
+            const newNom = document.getElementById(`divName_${id}`).value.trim();
+            const oldNom = document.getElementById(`divName_${id}`).dataset.oldName;
+            
+            if (!newNom) { showToast('Le nom ne peut pas être vide'); return; }
+            if (newNom === oldNom) { showToast('Aucun changement'); return; }
+            
+            // Mettre à jour la division
+            const { error } = await supabase.from('divisions').update({ nom: newNom }).eq('id', id);
+            if (error) { showToast('Erreur: ' + error.message); return; }
+            
+            // Mettre à jour tous les joueurs qui avaient cette division
+            const { error: updateError, count } = await supabase.from('joueurs').update({ division: newNom }).eq('division', oldNom);
+            if (updateError) { showToast('Erreur mise à jour joueurs: ' + updateError.message); return; }
+            
+            showToast(`Division modifiée ! Les joueurs ont été mis à jour.`);
+            await loadDivisions();
+            await loadDivisionsAdmin();
+            await loadStats();
+        }
+
+        async function deleteDivision(id, nom) {
+            // Vérifier si des joueurs utilisent cette division
+            const { count } = await supabase.from('joueurs').select('*', { count: 'exact', head: true }).eq('division', nom);
+            if (count > 0) {
+                showToast(`⚠️ Impossible: ${count} joueur(s) utilisent cette division`);
+                return;
+            }
+            
+            showModal('Supprimer', `Supprimer la division "${nom}" ?`, async () => {
+                await supabase.from('divisions').delete().eq('id', id);
+                showToast('Division supprimée');
+                await loadDivisions();
+                await loadDivisionsAdmin();
+                await loadStats();
+            });
+        }
+
+        // ========== ÉDITION DES JOUEURS ==========
+        async function openEditJoueur(id) {
+            const { data: j } = await supabase.from('joueurs').select('*').eq('id', id).single();
+            if (!j) return;
+            
+            document.getElementById('editJoueurId').value = j.id;
+            document.getElementById('editJoueurNom').value = j.nom;
+            document.getElementById('editJoueurSteamid').value = j.steamid;
+            document.getElementById('editJoueurEtatMajor').value = j.etat_major ? 'true' : 'false';
+            document.getElementById('editSteamidWarning').textContent = '';
+            
+            // Mettre à jour les options de division
+            updateDivisionSelects();
+            setTimeout(() => {
+                document.getElementById('editJoueurDivision').value = j.division;
+            }, 50);
+            
+            document.getElementById('editJoueurModal').classList.remove('hidden');
+        }
+
+        function closeEditJoueurModal() {
+            document.getElementById('editJoueurModal').classList.add('hidden');
+        }
+
+        async function saveJoueur() {
+            const id = document.getElementById('editJoueurId').value;
+            const nom = document.getElementById('editJoueurNom').value.trim();
+            const steamid = document.getElementById('editJoueurSteamid').value.trim();
+            const division = document.getElementById('editJoueurDivision').value;
+            const etat_major = document.getElementById('editJoueurEtatMajor').value === 'true';
+            
+            if (!nom || !steamid) { showToast('Remplissez tous les champs'); return; }
+            
+            // Vérifier si le SteamID existe déjà (sauf pour ce joueur)
+            const { data: existingSteamid } = await supabase.from('joueurs').select('id, nom').eq('steamid', steamid).neq('id', id);
+            if (existingSteamid && existingSteamid.length > 0) {
+                document.getElementById('editSteamidWarning').textContent = `⚠️ SteamID déjà utilisé par: ${existingSteamid[0].nom}`;
+                return;
+            }
+            
+            const { error } = await supabase.from('joueurs').update({ nom, steamid, division, etat_major }).eq('id', id);
+            if (error) { showToast('Erreur: ' + error.message); return; }
+            
+            showToast('Joueur modifié');
+            closeEditJoueurModal();
+            await refreshAllData();
+            // Rafraîchir la recherche si elle était active
+            if (document.getElementById('searchCasier').value) {
+                searchCasier();
+            }
+        }
+    </script>
+</body>
+</html>
