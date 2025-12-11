@@ -435,7 +435,7 @@
                 </div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>ID</th><th>Nom Prénom</th><th>Faute</th><th>Sanction</th><th>Division</th><th>Date</th><th>MP</th><th class="mp-only hidden">Actions</th></tr>
+                        <tr><th>ID</th><th>Nom Prénom</th><th>Faute</th><th>Sanction</th><th>Division</th><th>Date</th><th>MP</th><th class="admin-only hidden">Actions</th></tr>
                     </thead>
                     <tbody id="sanctionTableBody"></tbody>
                 </table>
@@ -484,13 +484,8 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Division</label>
-                            <select id="newJoueurDivision" class="form-select">
-                                <option value="1st">1st Infantry</option>
-                                <option value="101st">101st Airborne</option>
-                                <option value="3rd">3rd Armored</option>
-                                <option value="783rd">783rd MP Battalion</option>
-                                <option value="188th">188th</option>
-                                <option value="FFL">FFL</option>
+                            <select id="newJoueurDivision" class="form-select division-select">
+                                <option value="1st">1st</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -545,6 +540,23 @@
             <div id="tab-admin" class="tab-content hidden">
                 <div class="section-title">Administration</div>
                 
+                <div class="detail-card">
+                    <h3>Gérer les Divisions</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nouvelle Division</label>
+                            <input type="text" id="newDivisionName" class="form-input" placeholder="Ex: 82nd">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addDivision()">Ajouter</button>
+                    <div style="margin-top:15px">
+                        <table class="data-table">
+                            <thead><tr><th>Nom</th><th>Actions</th></tr></thead>
+                            <tbody id="divisionTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="detail-card">
                     <h3>Créer un Compte MP</h3>
                     <div class="form-grid">
@@ -616,11 +628,42 @@
         </div>
     </div>
 
+    <div id="editJoueurModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:500px">
+            <h3 class="modal-title">Modifier le Joueur</h3>
+            <input type="hidden" id="editJoueurId">
+            <div class="form-group">
+                <label class="form-label">Nom Prénom</label>
+                <input type="text" id="editJoueurNom" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">SteamID</label>
+                <input type="text" id="editJoueurSteamid" class="form-input">
+                <div id="editSteamidWarning" style="color:var(--stamp-red);font-size:12px;margin-top:5px"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Division</label>
+                <select id="editJoueurDivision" class="form-select division-select"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">État-Major</label>
+                <select id="editJoueurEtatMajor" class="form-select">
+                    <option value="false">Non</option>
+                    <option value="true">Oui (Confidentiel)</option>
+                </select>
+            </div>
+            <div class="modal-actions" style="margin-top:20px">
+                <button class="btn btn-secondary" onclick="closeEditJoueurModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveJoueur()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ppdtxpxnfkqckqgvbylp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwZHR4cHhuZmtxY2txZ3ZieWxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTk0NzYsImV4cCI6MjA4MDg3NTQ3Nn0.cfhdxSUhpKA0b0yKyEv8mhk-VoHajJyYuvh1qhiQr6E';
         const SALT = 'MP_SALT_1944';
-        const DIVISIONS = ['1st', '101st', '3rd', '783rd', '188th', 'FFL'];
+        let DIVISIONS = ['1st', '101st', '3rd', '783rd', '188th', 'FFL']; // Valeurs par défaut, chargées depuis Supabase
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let currentUser = null;
@@ -646,9 +689,27 @@
             return id;
         }
 
-        function init() {
+        async function init() {
             const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
             document.getElementById('currentDate').textContent = `${new Date().getDate()} ${months[new Date().getMonth()]}`;
+            await loadDivisions();
+        }
+
+        async function loadDivisions() {
+            const { data, error } = await supabase.from('divisions').select('nom').order('nom');
+            if (data && data.length > 0) {
+                DIVISIONS = data.map(d => d.nom);
+            }
+            updateDivisionSelects();
+        }
+
+        function updateDivisionSelects() {
+            const selects = document.querySelectorAll('.division-select');
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = DIVISIONS.map(d => `<option value="${d}">${d}</option>`).join('');
+                if (currentValue && DIVISIONS.includes(currentValue)) select.value = currentValue;
+            });
         }
 
         async function handleLogin() {
@@ -1070,12 +1131,16 @@
         }
 
         async function refreshAllData() {
+            await loadDivisions();
             await loadStats();
             await loadSanctions();
             await loadRapports();
             if (!isPublicMode) { 
                 await loadConvocations(); 
-                if (currentUser?.role === 'admin') await loadUsers(); 
+                if (currentUser?.role === 'admin') {
+                    await loadUsers();
+                    await loadDivisionsAdmin();
+                }
             }
         }
 
@@ -1157,7 +1222,7 @@
                         <td>${s.date_fin || 'N/A'}</td>
                         <td>${s.mp_en_charge || 'N/A'}</td>
                         <td>${s.sanctionneur || 'N/A'}</td>
-                        ${!isPublicMode ? `<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>` : ''}
+                        ${currentUser?.role === 'admin' ? `<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>` : ''}
                     </tr>`;
                 }
                 if (!sanctionsHtml) sanctionsHtml = '<tr><td colspan="8" style="text-align:center">Aucune sanction enregistrée</td></tr>';
@@ -1197,7 +1262,7 @@
                             <th>Fin</th>
                             <th>MP</th>
                             <th>Sanctionneur</th>
-                            ${!isPublicMode ? '<th>Actions</th>' : ''}
+                            ${currentUser?.role === 'admin' ? '<th>Actions</th>' : ''}
                         </tr></thead>
                         <tbody>${sanctionsHtml}</tbody>
                     </table>
@@ -1215,7 +1280,10 @@
                         <tbody>${rapportsHtml}</tbody>
                     </table>
                     
-                    ${!isPublicMode ? `<div style="margin-top:15px"><button class="btn btn-danger btn-small" onclick="deleteJoueur(${j.id})">Supprimer ce casier</button></div>` : ''}
+                    ${!isPublicMode ? `<div style="margin-top:15px">
+                        ${currentUser?.role === 'admin' ? `<button class="btn btn-secondary btn-small" onclick="openEditJoueur(${j.id})">✏️ Modifier les infos</button>` : ''}
+                        <button class="btn btn-danger btn-small" onclick="deleteJoueur(${j.id})">Supprimer ce casier</button>
+                    </div>` : ''}
                 </div>`;
             }
 
@@ -1239,7 +1307,7 @@
                     <td>${s.joueurs?.division||'N/A'}</td>
                     <td>${s.date_debut||'N/A'}</td>
                     <td>${s.mp_en_charge||'N/A'}</td>
-                    ${!isPublicMode?`<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>`:''}
+                    ${currentUser?.role === 'admin'?`<td><button class="btn btn-danger btn-small" onclick="deleteSanction(${s.id})">×</button></td>`:''}
                 </tr>`;
             }
             document.getElementById('sanctionTableBody').innerHTML = html || '<tr><td colspan="8" style="text-align:center">Aucune sanction</td></tr>';
@@ -1268,7 +1336,7 @@
                     <td>${r.created_at?.split('T')[0]||'N/A'}</td>
                     <td>
                         <button class="btn btn-secondary btn-small" onclick="viewRapport(${r.id})">Voir</button>
-                        ${!isPublicMode?`<button class="btn btn-danger btn-small" onclick="deleteRapport(${r.id})">×</button>`:''}
+                        ${currentUser?.role === 'admin'?`<button class="btn btn-danger btn-small" onclick="deleteRapport(${r.id})">×</button>`:''}
                     </td>
                 </tr>`;
             }
@@ -1393,8 +1461,16 @@
             const division = document.getElementById('newJoueurDivision').value;
             const etat_major = document.getElementById('newJoueurEtatMajor').value === 'true';
             if (!nom || !steamid) { showToast('Remplissez tous les champs'); return; }
+            
+            // Vérifier si le SteamID existe déjà
+            const { data: existingSteamid } = await supabase.from('joueurs').select('id, nom').eq('steamid', steamid);
+            if (existingSteamid && existingSteamid.length > 0) {
+                showToast(`⚠️ SteamID déjà utilisé par: ${existingSteamid[0].nom}`);
+                return;
+            }
+            
             const { error } = await supabase.from('joueurs').insert({ nom, steamid, division, etat_major });
-            if (error) { showToast('Erreur: SteamID existant'); return; }
+            if (error) { showToast('Erreur: ' + error.message); return; }
             showToast('Individu enregistré'); 
             document.getElementById('newJoueurNom').value = ''; 
             document.getElementById('newJoueurSteamid').value = ''; 
@@ -1439,8 +1515,14 @@
             refreshAllData();
         }
 
-        async function deleteSanction(id) { showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('sanctions').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); searchCasier(); }); }
-        async function deleteRapport(id) { showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('rapports').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); }); }
+        async function deleteSanction(id) { 
+            if (currentUser?.role !== 'admin') { showToast('⚠️ Seuls les admins peuvent supprimer'); return; }
+            showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('sanctions').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); searchCasier(); }); 
+        }
+        async function deleteRapport(id) { 
+            if (currentUser?.role !== 'admin') { showToast('⚠️ Seuls les admins peuvent supprimer'); return; }
+            showModal('Supprimer', 'Confirmer ?', async () => { await supabase.from('rapports').delete().eq('id', id); showToast('Supprimé'); refreshAllData(); }); 
+        }
         async function deleteJoueur(id) { showModal('Supprimer', 'Supprimer casier et sanctions ?', async () => { await supabase.from('sanctions').delete().eq('joueur_id', id); await supabase.from('joueurs').delete().eq('id', id); showToast('Supprimé'); document.getElementById('casierResult').innerHTML = ''; refreshAllData(); }); }
 
         async function addUser() {
@@ -1474,6 +1556,117 @@
         document.addEventListener('DOMContentLoaded', init);
         document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
         document.getElementById('loginUsername').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+
+        // ========== GESTION DES DIVISIONS ==========
+        async function loadDivisionsAdmin() {
+            const { data } = await supabase.from('divisions').select('*').order('nom');
+            let html = '';
+            for (const d of data || []) {
+                html += `<tr>
+                    <td><input type="text" class="form-input" value="${d.nom}" id="divName_${d.id}" style="width:150px"></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="saveDivision(${d.id})">💾</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteDivision(${d.id}, '${d.nom}')">×</button>
+                    </td>
+                </tr>`;
+            }
+            document.getElementById('divisionTableBody').innerHTML = html || '<tr><td colspan="2">Aucune division</td></tr>';
+        }
+
+        async function addDivision() {
+            const nom = document.getElementById('newDivisionName').value.trim();
+            if (!nom) { showToast('Entrez un nom de division'); return; }
+            
+            const { error } = await supabase.from('divisions').insert({ nom });
+            if (error) { showToast('Erreur: ' + (error.message.includes('duplicate') ? 'Division existe déjà' : error.message)); return; }
+            
+            showToast('Division ajoutée');
+            document.getElementById('newDivisionName').value = '';
+            await loadDivisions();
+            await loadDivisionsAdmin();
+            await loadStats();
+        }
+
+        async function saveDivision(id) {
+            const nom = document.getElementById(`divName_${id}`).value.trim();
+            if (!nom) { showToast('Le nom ne peut pas être vide'); return; }
+            
+            const { error } = await supabase.from('divisions').update({ nom }).eq('id', id);
+            if (error) { showToast('Erreur: ' + error.message); return; }
+            
+            showToast('Division modifiée');
+            await loadDivisions();
+            await loadStats();
+        }
+
+        async function deleteDivision(id, nom) {
+            // Vérifier si des joueurs utilisent cette division
+            const { count } = await supabase.from('joueurs').select('*', { count: 'exact', head: true }).eq('division', nom);
+            if (count > 0) {
+                showToast(`⚠️ Impossible: ${count} joueur(s) utilisent cette division`);
+                return;
+            }
+            
+            showModal('Supprimer', `Supprimer la division "${nom}" ?`, async () => {
+                await supabase.from('divisions').delete().eq('id', id);
+                showToast('Division supprimée');
+                await loadDivisions();
+                await loadDivisionsAdmin();
+                await loadStats();
+            });
+        }
+
+        // ========== ÉDITION DES JOUEURS ==========
+        async function openEditJoueur(id) {
+            const { data: j } = await supabase.from('joueurs').select('*').eq('id', id).single();
+            if (!j) return;
+            
+            document.getElementById('editJoueurId').value = j.id;
+            document.getElementById('editJoueurNom').value = j.nom;
+            document.getElementById('editJoueurSteamid').value = j.steamid;
+            document.getElementById('editJoueurEtatMajor').value = j.etat_major ? 'true' : 'false';
+            document.getElementById('editSteamidWarning').textContent = '';
+            
+            // Mettre à jour les options de division
+            updateDivisionSelects();
+            setTimeout(() => {
+                document.getElementById('editJoueurDivision').value = j.division;
+            }, 50);
+            
+            document.getElementById('editJoueurModal').classList.remove('hidden');
+        }
+
+        function closeEditJoueurModal() {
+            document.getElementById('editJoueurModal').classList.add('hidden');
+        }
+
+        async function saveJoueur() {
+            const id = document.getElementById('editJoueurId').value;
+            const nom = document.getElementById('editJoueurNom').value.trim();
+            const steamid = document.getElementById('editJoueurSteamid').value.trim();
+            const division = document.getElementById('editJoueurDivision').value;
+            const etat_major = document.getElementById('editJoueurEtatMajor').value === 'true';
+            
+            if (!nom || !steamid) { showToast('Remplissez tous les champs'); return; }
+            
+            // Vérifier si le SteamID existe déjà (sauf pour ce joueur)
+            const { data: existingSteamid } = await supabase.from('joueurs').select('id, nom').eq('steamid', steamid).neq('id', id);
+            if (existingSteamid && existingSteamid.length > 0) {
+                document.getElementById('editSteamidWarning').textContent = `⚠️ SteamID déjà utilisé par: ${existingSteamid[0].nom}`;
+                return;
+            }
+            
+            const { error } = await supabase.from('joueurs').update({ nom, steamid, division, etat_major }).eq('id', id);
+            if (error) { showToast('Erreur: ' + error.message); return; }
+            
+            showToast('Joueur modifié');
+            closeEditJoueurModal();
+            await refreshAllData();
+            // Rafraîchir la recherche si elle était active
+            if (document.getElementById('searchCasier').value) {
+                searchCasier();
+            }
+        }
     </script>
 </body>
 </html>
