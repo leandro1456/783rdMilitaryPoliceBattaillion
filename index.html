@@ -551,7 +551,7 @@
                     <button class="btn btn-primary" onclick="addDivision()">Ajouter</button>
                     <div style="margin-top:15px">
                         <table class="data-table">
-                            <thead><tr><th>Nom</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Nom</th><th>Joueurs</th><th>Actions</th></tr></thead>
                             <tbody id="divisionTableBody"></tbody>
                         </table>
                     </div>
@@ -1562,15 +1562,18 @@
             const { data } = await supabase.from('divisions').select('*').order('nom');
             let html = '';
             for (const d of data || []) {
+                // Compter les joueurs dans cette division
+                const { count } = await supabase.from('joueurs').select('*', { count: 'exact', head: true }).eq('division', d.nom);
                 html += `<tr>
-                    <td><input type="text" class="form-input" value="${d.nom}" id="divName_${d.id}" style="width:150px"></td>
+                    <td><input type="text" class="form-input" value="${d.nom}" id="divName_${d.id}" data-old-name="${d.nom}" style="width:150px"></td>
+                    <td style="color:var(--ink-faded);font-size:12px">${count || 0} joueur(s)</td>
                     <td>
                         <button class="btn btn-secondary btn-small" onclick="saveDivision(${d.id})">💾</button>
                         <button class="btn btn-danger btn-small" onclick="deleteDivision(${d.id}, '${d.nom}')">×</button>
                     </td>
                 </tr>`;
             }
-            document.getElementById('divisionTableBody').innerHTML = html || '<tr><td colspan="2">Aucune division</td></tr>';
+            document.getElementById('divisionTableBody').innerHTML = html || '<tr><td colspan="3">Aucune division</td></tr>';
         }
 
         async function addDivision() {
@@ -1588,14 +1591,23 @@
         }
 
         async function saveDivision(id) {
-            const nom = document.getElementById(`divName_${id}`).value.trim();
-            if (!nom) { showToast('Le nom ne peut pas être vide'); return; }
+            const newNom = document.getElementById(`divName_${id}`).value.trim();
+            const oldNom = document.getElementById(`divName_${id}`).dataset.oldName;
             
-            const { error } = await supabase.from('divisions').update({ nom }).eq('id', id);
+            if (!newNom) { showToast('Le nom ne peut pas être vide'); return; }
+            if (newNom === oldNom) { showToast('Aucun changement'); return; }
+            
+            // Mettre à jour la division
+            const { error } = await supabase.from('divisions').update({ nom: newNom }).eq('id', id);
             if (error) { showToast('Erreur: ' + error.message); return; }
             
-            showToast('Division modifiée');
+            // Mettre à jour tous les joueurs qui avaient cette division
+            const { error: updateError, count } = await supabase.from('joueurs').update({ division: newNom }).eq('division', oldNom);
+            if (updateError) { showToast('Erreur mise à jour joueurs: ' + updateError.message); return; }
+            
+            showToast(`Division modifiée ! Les joueurs ont été mis à jour.`);
             await loadDivisions();
+            await loadDivisionsAdmin();
             await loadStats();
         }
 
