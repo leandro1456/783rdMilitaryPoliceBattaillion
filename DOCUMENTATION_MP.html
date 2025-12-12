@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Archives Judiciaires MP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --olive-drab: #4a4a2a;
+            --paper-cream: #f4e4bc;
+            --paper-aged: #e8d4a8;
+            --ink-black: #1a1a1a;
+            --stamp-red: #8b2323;
+            --border-dark: #2a2a1a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: linear-gradient(135deg, #4a4a2a 0%, #3d3d1e 50%, #2a2a1a 100%);
+            min-height: 100vh;
+            color: var(--ink-black);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--paper-cream);
+            padding: 40px;
+            border: 3px double var(--border-dark);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-family: 'Special Elite', cursive;
+            color: var(--stamp-red);
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--olive-drab);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        h2 {
+            font-family: 'Special Elite', cursive;
+            color: var(--olive-drab);
+            border-bottom: 2px solid var(--border-dark);
+            padding-bottom: 10px;
+            margin: 40px 0 20px 0;
+            font-size: 1.5em;
+        }
+
+        h3 {
+            color: var(--stamp-red);
+            margin: 25px 0 15px 0;
+            font-size: 1.2em;
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .important {
+            background: rgba(139, 35, 35, 0.1);
+            border-left: 4px solid var(--stamp-red);
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .tip {
+            background: rgba(74, 74, 42, 0.1);
+            border-left: 4px solid var(--olive-drab);
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-dark);
+            padding: 15px;
+            margin: 15px 0;
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35px;
+            height: 35px;
+            background: var(--stamp-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .screenshot-placeholder {
+            background: #ddd;
+            border: 2px dashed var(--border-dark);
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-dark);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--olive-drab);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--border-dark);
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .toc-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: var(--olive-drab);
+        }
+
+        .toc a {
+            color: var(--ink-black);
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .toc a:hover {
+            color: var(--stamp-red);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            margin: 2px;
+        }
+
+        .badge-mp {
+            background: var(--olive-drab);
+            color: white;
+        }
+
+        .badge-admin {
+            background: var(--stamp-red);
+            color: white;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-dark);
+            text-align: center;
+            color: var(--olive-drab);
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>★ Documentation MP ★</h1>
+        <p class="subtitle">Archives Judiciaires - 783rd Military Police Battalion</p>
+
+        <!-- TABLE DES MATIÈRES -->
+        <div class="toc">
+            <div class="toc-title">📋 Table des Matières</div>
+            <a href="#introduction">1. Introduction</a>
+            <a href="#connexion">2. Connexion au Système</a>
+            <a href="#interface">3. Découverte de l'Interface</a>
+            <a href="#casiers">4. Rechercher un Casier Judiciaire</a>
+            <a href="#gestion">5. Onglet Gestion (Créer des dossiers)</a>
+            <a href="#joueur">6. Enregistrer un Nouvel Individu</a>
+            <a href="#sanction">7. Ajouter une Sanction</a>
+            <a href="#rapports">8. Onglet Rapports</a>
+            <a href="#creer-rapport">9. Créer un Rapport</a>
+            <a href="#convocations">10. Gérer les Convocations</a>
+            <a href="#astuces">11. Astuces et Bonnes Pratiques</a>
+            <a href="#faq">12. Questions Fréquentes (FAQ)</a>
+        </div>
+
+        <!-- INTRODUCTION -->
+        <h2 id="introduction">1. Introduction</h2>
+        <p>
+            Bienvenue dans le système d'<strong>Archives Judiciaires</strong> du 783rd Military Police Battalion. 
+            Cette application vous permet de gérer les casiers judiciaires des soldats, d'enregistrer les sanctions 
+            et de rédiger des rapports d'intervention.
+        </p>
+        
+        <div class="important">
+            <strong>⚠️ IMPORTANT :</strong> Ce système contient des informations confidentielles. 
+            Ne partagez jamais vos identifiants de connexion et déconnectez-vous toujours après utilisation.
+        </div>
+
+        <h3>Qui peut accéder au système ?</h3>
+        <table>
+            <tr>
+                <th>Rôle</th>
+                <th>Accès</th>
+                <th>Permissions</th>
+            </tr>
+            <tr>
+                <td><span class="badge badge-mp">MP</span></td>
+                <td>Casiers, Rapports, Gestion</td>
+                <td>Créer joueurs, sanctions, rapports. Voir tout.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-admin">Admin</span></td>
+                <td>Tout + Administration</td>
+                <td>Tout + Gérer comptes, divisions, supprimer données</td>
+            </tr>
+            <tr>
+                <td>Public</td>
+                <td>Casiers uniquement</td>
+                <td>Consultation seule (lecture)</td>
+            </tr>
+        </table>
+
+        <!-- CONNEXION -->
+        <h2 id="connexion">2. Connexion au Système</h2>
+        <p>Lorsque vous accédez au site, vous arrivez sur l'écran de connexion.</p>
+
+        <h3>Comment se connecter :</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            Entrez votre <strong>Identifiant</strong> (fourni par un administrateur)
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            Entrez votre <strong>Mot de passe</strong>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            Cliquez sur <strong>"Connexion MP"</strong>
+        </div>
+
+        <div class="tip">
+            <strong>💡 Astuce :</strong> Vous pouvez aussi appuyer sur <code>Entrée</code> après avoir tapé votre mot de passe.
+        </div>
+
+        <h3>Accès Public (sans connexion) :</h3>
+        <p>
+            Si vous cliquez sur <strong>"Accès Public"</strong>, vous pourrez uniquement consulter les casiers 
+            judiciaires sans pouvoir les modifier. C'est utile pour les officiers qui ont juste besoin de vérifier 
+            un casier rapidement.
+        </p>
+
+        <div class="important">
+            <strong>⚠️ Note :</strong> Les dossiers marqués "État-Major" sont cachés en accès public et affichent 
+            "CONFIDENTIEL - Référer à la Military Police".
+        </div>
+
+        <!-- INTERFACE -->
+        <h2 id="interface">3. Découverte de l'Interface</h2>
+        
+        <h3>L'en-tête</h3>
+        <p>En haut de la page, vous voyez :</p>
+        <ul>
+            <li><strong>Le titre</strong> : "ARCHIVES JUDICIAIRES - MILITARY POLICE"</li>
+            <li><strong>Votre nom d'utilisateur</strong> et votre rôle (MP ou Admin)</li>
+            <li><strong>Le bouton Déconnexion</strong> (en rouge)</li>
+        </ul>
+
+        <h3>Les onglets de navigation</h3>
+        <p>Sous l'en-tête, vous avez plusieurs onglets :</p>
+        <table>
+            <tr>
+                <th>Onglet</th>
+                <th>Description</th>
+                <th>Accès</th>
+            </tr>
+            <tr>
+                <td><strong>Casiers</strong></td>
+                <td>Rechercher et consulter les casiers judiciaires</td>
+                <td>Tous</td>
+            </tr>
+            <tr>
+                <td><strong>Rapports</strong></td>
+                <td>Liste de tous les rapports + création</td>
+                <td>MP + Admin</td>
+            </tr>
+            <tr>
+                <td><strong>Gestion</strong></td>
+                <td>Créer joueurs, sanctions, voir convocations</td>
+                <td>MP + Admin</td>
+            </tr>
+            <tr>
+                <td><strong>Sanctions</strong></td>
+                <td>Liste complète de toutes les sanctions</td>
+                <td>Admin uniquement</td>
+            </tr>
+            <tr>
+                <td><strong>Administration</strong></td>
+                <td>Gérer comptes, divisions</td>
+                <td>Admin uniquement</td>
+            </tr>
+        </table>
+
+        <!-- CASIERS -->
+        <h2 id="casiers">4. Rechercher un Casier Judiciaire</h2>
+        <p>L'onglet <strong>Casiers</strong> est votre outil principal pour consulter l'historique d'un soldat.</p>
+
+        <h3>Comment rechercher :</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            Cliquez sur l'onglet <strong>"Casiers"</strong>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            Dans la barre de recherche, tapez :
+            <ul>
+                <li>Le <strong>nom</strong> du soldat (ex: "John Smith")</li>
+                <li>OU son <strong>SteamID</strong> (ex: "STEAM_0:1:123456")</li>
+                <li>OU un <strong>numéro de sanction</strong> (ex: "138725")</li>
+            </ul>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            Cliquez sur <strong>"Rechercher"</strong> ou appuyez sur <code>Entrée</code>
+        </div>
+
+        <h3>Ce que vous voyez dans un casier :</h3>
+        <ul>
+            <li><strong>Informations du soldat</strong> : Nom, SteamID, Division, État-Major</li>
+            <li><strong>Nombre total de sanctions</strong></li>
+            <li><strong>Nombre de rapports liés</strong></li>
+            <li><strong>Historique des sanctions</strong> : Tableau avec toutes les sanctions</li>
+            <li><strong>Rapports impliquant cette personne</strong> : Liste des rapports où le soldat apparaît</li>
+        </ul>
+
+        <div class="tip">
+            <strong>💡 Astuce :</strong> Si vous cherchez par numéro de sanction (ex: "138725"), la sanction 
+            correspondante sera surlignée en rouge dans le tableau.
+        </div>
+
+        <h3>Badge "À CONVOQUER"</h3>
+        <p>
+            Si un soldat a <strong>3 sanctions ou plus</strong>, un badge rouge <code>À CONVOQUER</code> apparaît 
+            à côté de son nom. Cela signifie qu'il doit être convoqué devant l'État-Major.
+        </p>
+
+        <!-- GESTION -->
+        <h2 id="gestion">5. Onglet Gestion (Créer des dossiers)</h2>
+        <p>
+            L'onglet <strong>Gestion</strong> est réservé aux MP connectés. C'est ici que vous créez de nouveaux 
+            dossiers et ajoutez des sanctions.
+        </p>
+
+        <h3>Ce que contient l'onglet Gestion :</h3>
+        <ul>
+            <li><strong>Statistiques par Division</strong> : Nombre de sanctions par unité</li>
+            <li><strong>Formulaire "Enregistrer un Individu"</strong> : Créer un nouveau joueur</li>
+            <li><strong>Formulaire "Ajouter une Sanction"</strong> : Ajouter une sanction à un joueur existant</li>
+            <li><strong>Liste des Convocations</strong> : Joueurs ayant 3+ sanctions</li>
+        </ul>
+
+        <!-- JOUEUR -->
+        <h2 id="joueur">6. Enregistrer un Nouvel Individu</h2>
+        <p>Avant de pouvoir ajouter une sanction, le soldat doit exister dans la base de données.</p>
+
+        <h3>Étapes :</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            Allez dans l'onglet <strong>"Gestion"</strong>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            Dans la section <strong>"Enregistrer un Individu"</strong>, remplissez :
+            <ul>
+                <li><strong>Nom Prénom</strong> : Le nom RP du soldat (ex: "John Smith")</li>
+                <li><strong>SteamID</strong> : Son identifiant Steam (ex: "STEAM_0:1:123456789")</li>
+                <li><strong>Division</strong> : Son unité (1st, 101st, 3rd, etc.)</li>
+                <li><strong>État-Major</strong> : Sélectionnez "Oui" si c'est un officier d'état major (son dossier sera confidentiel)</li>
+            </ul>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            Cliquez sur <strong>"Enregistrer"</strong>
+        </div>
+
+        <div class="important">
+            <strong>⚠️ Vérification automatique :</strong>
+            <ul>
+                <li>Le système vérifie si le <strong>nom</strong> existe déjà (avertissement affiché)</li>
+                <li>Le système vérifie si le <strong>SteamID</strong> existe déjà (avertissement si doublon)</li>
+            </ul>
+            Cela évite de créer des doublons dans la base de données.
+        </div>
+
+        <div class="tip">
+            <strong>💡 Comment trouver le SteamID ?</strong><br>
+            En jeu, ouvrez la console et tapez <code>status</code>. Vous verrez le SteamID de tous les joueurs connectés.
+        </div>
+
+        <!-- SANCTION -->
+        <h2 id="sanction">7. Ajouter une Sanction</h2>
+        <p>Une fois le joueur enregistré, vous pouvez lui ajouter des sanctions.</p>
+
+        <h3>Étapes :</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            Allez dans l'onglet <strong>"Gestion"</strong>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            Dans la section <strong>"Ajouter une Sanction"</strong> :
+            <ul>
+                <li><strong>Rechercher l'individu</strong> : Tapez le nom et cliquez sur le résultat pour le sélectionner</li>
+            </ul>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            Remplissez les détails de la sanction :
+            <ul>
+                <li><strong>Faute commise</strong> : Description de l'infraction (ex: "Insubordination grave")</li>
+                <li><strong>Sanction appliquée</strong> : La punition (ex: "Arrêt 5 jours", "Blâme", "Rétrogradation")</li>
+                <li><strong>Durée (jours)</strong> : Nombre de jours de la sanction</li>
+                <li><strong>Sanctionneur</strong> : Qui a donné la sanction (ex: "CPT John Smith")</li>
+            </ul>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            Cliquez sur <strong>"Enregistrer la Sanction"</strong>
+        </div>
+
+        <h3>Ce qui se passe automatiquement :</h3>
+        <ul>
+            <li>Un <strong>numéro de sanction unique</strong> à 6 chiffres est généré (ex: n°138725)</li>
+            <li>La <strong>date de début</strong> est la date du jour</li>
+            <li>La <strong>date de fin</strong> est calculée selon la durée</li>
+            <li>Le <strong>MP en charge</strong> est automatiquement votre nom d'utilisateur</li>
+        </ul>
+
+        <div class="tip">
+            <strong>💡 Astuce :</strong> Le champ "Faute" propose des suggestions automatiques basées sur 
+            les fautes déjà enregistrées. Commencez à taper et sélectionnez une suggestion.
+        </div>
+
+        <!-- RAPPORTS -->
+        <h2 id="rapports">8. Onglet Rapports</h2>
+        <p>L'onglet <strong>Rapports</strong> liste tous les rapports rédigés par la MP.</p>
+
+        <h3>Fonctionnalités :</h3>
+        <ul>
+            <li><strong>Barre de recherche</strong> : Cherchez par titre, MP ou contenu</li>
+            <li><strong>Filtre par type</strong> : Filtrez par catégorie (Interrogatoire, Arrestation, etc.)</li>
+            <li><strong>Bouton "+ Créer un Rapport"</strong> : Ouvre le formulaire de création</li>
+            <li><strong>Tableau des rapports</strong> : Liste avec numéro, type, titre, MP, date</li>
+        </ul>
+
+        <h3>Voir un rapport :</h3>
+        <p>Cliquez sur le titre d'un rapport ou sur le bouton <strong>"Voir"</strong> pour ouvrir les détails.</p>
+        <p>Dans la fenêtre du rapport, les <strong>personnes impliquées sont cliquables</strong>. 
+        Cliquez sur un nom pour voir directement son casier judiciaire.</p>
+
+        <!-- CRÉER RAPPORT -->
+        <h2 id="creer-rapport">9. Créer un Rapport</h2>
+        <p>Les rapports permettent de documenter vos interventions de manière structurée.</p>
+
+        <h3>Types de rapports disponibles :</h3>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Usage</th>
+                <th>Champs spécifiques</th>
+            </tr>
+            <tr>
+                <td><strong>Interrogatoire</strong></td>
+                <td>Procès-verbal d'interrogatoire</td>
+                <td>Questions/Réponses dynamiques, Conclusions</td>
+            </tr>
+            <tr>
+                <td><strong>Arrestation</strong></td>
+                <td>Rapport d'arrestation</td>
+                <td>Motif, Niveau de résistance, Objets saisis</td>
+            </tr>
+            <tr>
+                <td><strong>Incident</strong></td>
+                <td>Incident sur base</td>
+                <td>Type d'incident, Blessés/Dégâts, Mesures prises</td>
+            </tr>
+            <tr>
+                <td><strong>Capture</strong></td>
+                <td>Capture de prisonnier</td>
+                <td>Type de prisonnier, Circonstances, Lieu de détention</td>
+            </tr>
+            <tr>
+                <td><strong>Patrouille</strong></td>
+                <td>Compte-rendu de patrouille</td>
+                <td>Secteur, Durée, Anomalies signalées</td>
+            </tr>
+            <tr>
+                <td><strong>Enquête</strong></td>
+                <td>Rapport d'enquête</td>
+                <td>Objet, Éléments recueillis, Suspects, Conclusions</td>
+            </tr>
+            <tr>
+                <td><strong>Autre</strong></td>
+                <td>Rapport libre</td>
+                <td>Contenu libre</td>
+            </tr>
+        </table>
+
+        <h3>Étapes pour créer un rapport :</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            Cliquez sur <strong>"+ Créer un Rapport"</strong>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            Sélectionnez le <strong>Type de rapport</strong> - le formulaire s'adapte automatiquement
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            Remplissez les <strong>champs communs</strong> :
+            <ul>
+                <li>Titre du rapport</li>
+                <li>MP en charge (pré-rempli)</li>
+                <li>Date et heure (pré-rempli)</li>
+                <li>Lieu</li>
+                <li>Personnes impliquées (recherchez et ajoutez)</li>
+            </ul>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            Remplissez les <strong>champs spécifiques</strong> au type choisi
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            Cliquez sur <strong>"Enregistrer le Rapport"</strong>
+        </div>
+
+        <h3>Ajouter des personnes impliquées :</h3>
+        <p>
+            Tapez le nom d'un soldat dans le champ de recherche. Les résultats apparaissent automatiquement.
+            Cliquez sur un nom pour l'ajouter. Vous pouvez ajouter plusieurs personnes.
+            Pour retirer quelqu'un, cliquez sur le <strong>×</strong> à côté de son nom.
+        </p>
+
+        <h3>Rapport d'Interrogatoire - Système Q/R :</h3>
+        <p>Pour les interrogatoires, vous pouvez ajouter autant de paires Question/Réponse que nécessaire :</p>
+        <ul>
+            <li>Cliquez sur <strong>"+ Ajouter une Question"</strong></li>
+            <li>Tapez la question posée</li>
+            <li>Tapez la réponse obtenue</li>
+            <li>Répétez pour chaque échange</li>
+            <li>Utilisez le bouton <strong>×</strong> pour supprimer une paire</li>
+        </ul>
+
+        <!-- CONVOCATIONS -->
+        <h2 id="convocations">10. Gérer les Convocations</h2>
+        <p>
+            En bas de l'onglet <strong>Gestion</strong>, vous trouverez la liste des soldats qui doivent 
+            être convoqués devant l'État-Major (ceux ayant 3 sanctions ou plus).
+        </p>
+
+        <h3>Ce que vous voyez :</h3>
+        <table>
+            <tr>
+                <th>Colonne</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>Nom</td>
+                <td>Nom du soldat</td>
+            </tr>
+            <tr>
+                <td>Division</td>
+                <td>Son unité</td>
+            </tr>
+            <tr>
+                <td>Sanctions</td>
+                <td>Nombre total de sanctions</td>
+            </tr>
+            <tr>
+                <td>Actions</td>
+                <td>Bouton "Convoqué" pour marquer comme traité</td>
+            </tr>
+        </table>
+
+        <p>
+            Quand vous cliquez sur <strong>"Convoqué"</strong>, le soldat est retiré de la liste. 
+            Il y reviendra s'il reçoit une nouvelle sanction.
+        </p>
+
+        <!-- ASTUCES -->
+        <h2 id="astuces">11. Astuces et Bonnes Pratiques</h2>
+
+        <h3>✅ À faire :</h3>
+        <ul>
+            <li>Toujours <strong>rechercher si le joueur existe</strong> avant de le créer</li>
+            <li>Utiliser des <strong>descriptions claires</strong> pour les fautes</li>
+            <li>Remplir le champ <strong>Sanctionneur</strong> avec le grade + nom complet</li>
+            <li>Ajouter les <strong>personnes impliquées</strong> dans les rapports pour les lier aux casiers</li>
+            <li>Se <strong>déconnecter</strong> après utilisation</li>
+        </ul>
+
+        <h3>❌ À éviter :</h3>
+        <ul>
+            <li>Créer des doublons de joueurs</li>
+            <li>Mettre des descriptions trop vagues ("a fait de la merde")</li>
+            <li>Oublier de renseigner le sanctionneur</li>
+            <li>Partager vos identifiants</li>
+        </ul>
+
+        <h3>🔍 Raccourcis utiles :</h3>
+        <ul>
+            <li><code>Entrée</code> dans un champ de recherche = lancer la recherche</li>
+            <li>Cliquez sur un nom dans les résultats = le sélectionner</li>
+            <li>Cliquez sur un nom dans un rapport = voir son casier</li>
+        </ul>
+
+        <!-- FAQ -->
+        <h2 id="faq">12. Questions Fréquentes (FAQ)</h2>
+
+        <h3>❓ Je ne trouve pas un joueur dans la recherche</h3>
+        <p>
+            Il n'existe peut-être pas encore dans la base. Allez dans <strong>Gestion > Enregistrer un Individu</strong> 
+            pour le créer d'abord.
+        </p>
+
+        <h3>❓ J'ai créé un joueur en double, que faire ?</h3>
+        <p>
+            Contactez un administrateur. Seuls les admins peuvent supprimer des casiers et fusionner les données.
+        </p>
+
+        <h3>❓ Je me suis trompé dans une sanction</h3>
+        <p>
+            Seuls les administrateurs peuvent supprimer des sanctions. Contactez un admin pour corriger l'erreur.
+        </p>
+
+        <h3>❓ Pourquoi je ne vois pas l'onglet "Sanctions" ?</h3>
+        <p>
+            Cet onglet est réservé aux administrateurs. En tant que MP, vous voyez les sanctions 
+            dans les casiers individuels et dans l'onglet Gestion.
+        </p>
+
+        <h3>❓ Comment voir les rapports liés à une personne ?</h3>
+        <p>
+            Recherchez la personne dans l'onglet <strong>Casiers</strong>. En bas de son casier, 
+            vous verrez la section "Rapports Impliquant cette Personne".
+        </p>
+
+        <h3>❓ J'ai oublié mon mot de passe</h3>
+        <p>
+            Contactez un administrateur qui pourra réinitialiser votre compte.
+        </p>
+
+        <h3>❓ Le site ne charge pas / affiche une erreur</h3>
+        <p>
+            Vérifiez votre connexion internet. Si le problème persiste, videz le cache de votre navigateur 
+            (<code>Ctrl + Shift + R</code>) ou contactez un administrateur.
+        </p>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p><strong>783rd Military Police Battalion</strong></p>
+            <p>Archives Judiciaires - Documentation v1.0</p>
+            <p style="margin-top:10px; font-size:0.9em;">
+                Pour toute question, contactez un administrateur.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
