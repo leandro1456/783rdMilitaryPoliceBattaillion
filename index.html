@@ -1241,9 +1241,7 @@
                     } catch { return false; }
                 });
 
-                const lastPalier = j.convoque || 0;
-                const nextPalier = lastPalier + 3;
-                const badge = ((count || 0) >= 3 && (count || 0) >= nextPalier) ? '<span class="badge-convocation">À CONVOQUER</span>' : '';
+                const badge = ((j.convoque || 0) >= 3) ? '<span class="badge-convocation">À CONVOQUER</span>' : '';
                 
                 // HTML des sanctions
                 let sanctionsHtml = '';
@@ -1402,27 +1400,20 @@
         }
 
         async function loadConvocations() {
-            // Convoquer toutes les 3 sanctions (3, 6, 9, 12...)
+            // Afficher les joueurs qui ont convoque >= 3
             const { data: joueurs } = await db.from('joueurs').select('*');
             let html = '';
             for (const j of joueurs || []) {
-                const { count } = await db.from('sanctions').select('*', { count: 'exact', head: true }).eq('joueur_id', j.id);
-                const sanctionsCount = count || 0;
-                const lastPalier = j.convoque || 0; // Dernier palier convoqué (0, 3, 6, 9...)
-                const nextPalier = lastPalier + 3; // Prochain palier
-                
-                // Si atteint ou dépassé le prochain palier de 3
-                if (sanctionsCount >= 3 && sanctionsCount >= nextPalier) {
-                    html += `<tr><td>${j.nom}</td><td>${j.division}</td><td><span class="badge-convocation">${sanctionsCount}</span></td><td><button class="btn btn-secondary btn-small" onclick="markConvoked(${j.id}, ${sanctionsCount})">Convoqué</button></td></tr>`;
+                if ((j.convoque || 0) >= 3) {
+                    html += `<tr><td>${j.nom}</td><td>${j.division}</td><td><span class="badge-convocation">${j.convoque}</span></td><td><button class="btn btn-secondary btn-small" onclick="markConvoked(${j.id})">Convoqué</button></td></tr>`;
                 }
             }
             document.getElementById('convocationTableBody').innerHTML = html || '<tr><td colspan="4" style="text-align:center">Personne à convoquer</td></tr>';
         }
 
-        async function markConvoked(id, sanctionsCount) { 
-            // Enregistrer le palier actuel (arrondi au multiple de 3 inférieur ou égal)
-            const palier = Math.floor(sanctionsCount / 3) * 3;
-            await db.from('joueurs').update({ convoque: palier }).eq('id', id); 
+        async function markConvoked(id) { 
+            // Remet à 0
+            await db.from('joueurs').update({ convoque: 0 }).eq('id', id); 
             showToast('Convocation traitée'); 
             loadConvocations();
         }
@@ -1548,6 +1539,10 @@
                 mp_en_charge: currentUser.username, 
                 sanctionneur 
             });
+            
+            // +1 sur convoque
+            const { data: joueur } = await db.from('joueurs').select('convoque').eq('id', joueur_id).single();
+            await db.from('joueurs').update({ convoque: (joueur?.convoque || 0) + 1 }).eq('id', joueur_id);
             
             showToast(`Sanction n°${sanction_id} enregistrée`); 
             document.getElementById('searchSanctionJoueur').value = '';
